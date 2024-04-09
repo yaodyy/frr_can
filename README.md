@@ -7,7 +7,7 @@ FRRouting
 
 FRR is free software that implements and manages various IPv4 and IPv6 routing
 protocols. It runs on nearly all distributions of Linux and BSD and
-supports all modern CPU architectures.This is git test.
+supports all modern CPU architectures.
 
 FRR currently supports the following protocols:
 
