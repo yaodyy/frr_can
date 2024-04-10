@@ -42,6 +42,8 @@
 #include "bgp_flowspec_private.h"
 #include "bgp_mac.h"
 
+#include "bgp_can.h"
+
 /* Attribute strings for logging. */
 static const struct message attr_str[] = {
 	{BGP_ATTR_ORIGIN, "ORIGIN"},
@@ -2624,6 +2626,9 @@ bgp_attr_ext_communities(struct bgp_attr_parser_args *args)
 	/* Get the tunnel type from encap extended community */
 	bgp_attr_extcom_tunnel_type(attr,
 		(bgp_encap_types *)&attr->encap_tunneltype);
+
+	/* 储存算力信息 */
+	parse_comstate(attr->ecommunity);
 
 	/* Extract link bandwidth, if any. */
 	(void)ecommunity_linkbw_present(bgp_attr_get_ecommunity(attr),
