@@ -42,6 +42,8 @@
 #include "bgp_flowspec_private.h"
 #include "bgp_mac.h"
 
+#include "bgp_can.h"
+
 
 /* Attribute strings for logging. */
 static const struct message attr_str[] = {
