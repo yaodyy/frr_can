@@ -18,6 +18,7 @@
 
 #include "bgpd/bgpd.h"
 #include "bgpd/bgp_ecommunity.h"
+#include "bgpd/bgp_can.h"
 #include "bgpd/bgp_lcommunity.h"
 #include "bgpd/bgp_aspath.h"
 #include "bgpd/bgp_flowspec_private.h"
@@ -586,7 +587,7 @@ static const char *ecommunity_gettoken(const char *str, void *eval_ptr,
 	if (*p == '\0')
 		return NULL;
 
-	/* "rt", "nt", "soo", and "color" keyword parse. */
+	/* "rt", "nt", "soo", "sid", "eip" and "color","com" keyword parse. */
 	/* "rt" */
 	if (tolower((unsigned char)*p) == 'r') {
 		p++;
@@ -636,6 +637,20 @@ static const char *ecommunity_gettoken(const char *str, void *eval_ptr,
 			}
 			goto error;
 		}
+		/* "sid" match check.  */
+		if (tolower((unsigned char)*p) == 'i'){
+			p++;
+			if (tolower((unsigned char)*p) == 'd'){
+				p++;
+				*token = ecommunity_token_sid;
+				return p;
+			}
+			if (isspace((unsigned char)*p) || *p == '\0') {
+				*token = ecommunity_token_sid;
+				return p;
+			}
+			goto error;
+		}
 		if (isspace((unsigned char)*p) || *p == '\0') {
 			*token = ecommunity_token_soo;
 			return p;
@@ -643,13 +658,89 @@ static const char *ecommunity_gettoken(const char *str, void *eval_ptr,
 		goto error;
 	}
 
+	/* "eip" match check.  */
+	if (tolower((unsigned char)*p) == 'e'){
+		p++;
+		if (tolower((unsigned char)*p) == 'i'){
+			p++;
+			if (tolower((unsigned char)*p) == 'p'){
+				p++;
+				*token = ecommunity_token_eip;
+				return p;
+			}
+			if (isspace((unsigned char)*p) || *p == '\0') {
+				*token = ecommunity_token_eip;
+				return p;
+			}
+			goto error;
+		}
+		/* "enabled" match check.  */
+		if (tolower((unsigned char)*p) == 'n'){
+			p++;
+			if (tolower((unsigned char)*p) == 'a'){
+				p++;
+				if (tolower((unsigned char)*p) == 'b'){
+					p++;
+					if (tolower((unsigned char)*p) == 'l'){
+						p++;
+						if (tolower((unsigned char)*p) == 'e'){
+							p++;
+							if (tolower((unsigned char)*p) == 'd'){
+								p++;
+								*token = ecommunity_token_enabled;
+								return p;
+							}
+							if (isspace((unsigned char)*p) || *p == '\0') {
+								*token = ecommunity_token_enabled;
+								return p;
+							}
+							goto error;
+							}
+							if (isspace((unsigned char)*p) || *p == '\0') {
+								*token = ecommunity_token_enabled;
+								return p;
+							}
+							goto error;
+						}
+						if (isspace((unsigned char)*p) || *p == '\0') {
+							*token = ecommunity_token_enabled;
+							return p;
+						}
+						goto error;
+					}
+					if (isspace((unsigned char)*p) || *p == '\0') {
+						*token = ecommunity_token_enabled;
+						return p;
+					}
+					goto error;
+			}
+			if (isspace((unsigned char)*p) || *p == '\0') {
+				*token = ecommunity_token_enabled;
+				return p;
+			}
+			goto error;
+		}
+		if (isspace((unsigned char)*p) || *p == '\0') {
+			*token = ecommunity_token_enabled;
+			return p;
+		}
+		goto error;
+	}
+
+
 	/* "color" */
 	if (tolower((unsigned char)*p) == 'c') {
 		ptr_color = &str_color[0];
 		for (unsigned int i = 0; i < 5; i++) {
-			if (tolower((unsigned char)*p) != *ptr_color)
+			if (tolower((unsigned char)*p) != *ptr_color){
+				/* "com" match check */
+				if (i==2 && (tolower((unsigned char)*p) == 'm')){
+					p++;
+					*token = ecommunity_token_com;
+					return p;
+				}
 				break;
-
+			}
 			p++;
 			ptr_color++;
 		}
@@ -659,6 +750,30 @@ static const char *ecommunity_gettoken(const char *str, void *eval_ptr,
 		}
 		goto error;
 	}
+
+	/* "mem" match check.  */
+	if (tolower((unsigned char)*p) == 'm'){
+		p++;
+		if (tolower((unsigned char)*p) == 'e'){
+			p++;
+			if (tolower((unsigned char)*p) == 'm'){
+				p++;
+				*token = ecommunity_token_mem;
+				return p;
+			}
+			if (isspace((unsigned char)*p) || *p == '\0') {
+				*token = ecommunity_token_mem;
+				return p;
+			}
+			goto error;
+		}
+		if (isspace((unsigned char)*p) || *p == '\0') {
+			*token = ecommunity_token_mem;
+			return p;
+		}
+		goto error;
+	}
+
 	/* What a mess, there are several possibilities:
 	 *
 	 * a) A.B.C.D:MN
@@ -842,6 +957,17 @@ static struct ecommunity *ecommunity_str2com_internal(const char *str, int type,
 				type = ECOMMUNITY_SITE_ORIGIN;
 			if (token == ecommunity_token_nt)
 				type = ECOMMUNITY_NODE_TARGET;
+			if (token = ecommunity_token_sid)
+				type = ECOMMUNITY_SERVICE_ID;
+			if (token == ecommunity_token_eip)
+				type = ECOMMUNITY_EGRESS_IP;
+			if (token == ecommunity_token_com)
+				type = ECOMMUNITY_COMPUTATION_USAGE;
+			if (token == ecommunity_token_mem)
+				type = ECOMMUNITY_MEMORY_USAGE;
+			if (token == ecommunity_token_enabled)
+				type = ECOMMUNITY_ENABLED;
+
 			if (token == ecommunity_token_color)
 				type = ECOMMUNITY_COLOR;
 			break;
@@ -941,11 +1067,63 @@ static int ecommunity_rt_soo_str_internal(char *buf, size_t bufsz,
 	/* Determine prefix for string, if any. */
 	switch (format) {
 	case ECOMMUNITY_FORMAT_COMMUNITY_LIST:
-		prefix = (sub_type == ECOMMUNITY_ROUTE_TARGET ? "rt " : "soo ");
-		break;
+		if (sub_type == ECOMMUNITY_ROUTE_TARGET) {
+			prefix = "rt ";
+			break;
+		}
+		else if (sub_type == ECOMMUNITY_SITE_ORIGIN) {
+			prefix = "soo ";
+			break;
+		}
+		else if (sub_type == ECOMMUNITY_SERVICE_ID) {
+			prefix = "sid ";
+			break;
+		}
+		else if (sub_type == ECOMMUNITY_EGRESS_IP) {
+			prefix = "eip ";
+			break;
+		}
+		else if (sub_type == ECOMMUNITY_COMPUTATION_USAGE) {
+			prefix = "com ";
+			break;
+		}
+		else if (sub_type == ECOMMUNITY_MEMORY_USAGE) {
+			prefix = "mem ";
+			break;
+		}
+		else{
+			prefix = "enabled ";
+			break; 
+		}
 	case ECOMMUNITY_FORMAT_DISPLAY:
-		prefix = (sub_type == ECOMMUNITY_ROUTE_TARGET ? "RT:" : "SoO:");
-		break;
+		if (sub_type == ECOMMUNITY_ROUTE_TARGET) {
+			prefix = "RT ";
+			break;
+		}
+		else if (sub_type == ECOMMUNITY_SITE_ORIGIN) {
+			prefix = "SoO ";
+			break;
+		}
+		else if (sub_type == ECOMMUNITY_SERVICE_ID) {
+			prefix = "SID ";
+			break;
+		}
+		else if (sub_type == ECOMMUNITY_EGRESS_IP) {
+			prefix = "EIP ";
+			break;
+		}
+		else if (sub_type == ECOMMUNITY_COMPUTATION_USAGE) {
+			prefix = "Com ";
+			break;
+		}
+		else if (sub_type == ECOMMUNITY_MEMORY_USAGE) {
+			prefix = "Mem ";
+			break;
+		}
+		else{
+			prefix = "Enabled ";
+			break; 
+		}
 	case ECOMMUNITY_FORMAT_ROUTE_MAP:
 		prefix = "";
 		break;
@@ -1139,7 +1317,12 @@ char *ecommunity_ecom2str(struct ecommunity *ecom, int format, int filter)
 			/* Low-order octet of type. */
 			sub_type = *pnt++;
 			if (sub_type != ECOMMUNITY_ROUTE_TARGET
-			    && sub_type != ECOMMUNITY_SITE_ORIGIN) {
+			    && sub_type != ECOMMUNITY_SITE_ORIGIN
+				&& sub_type != ECOMMUNITY_SERVICE_ID
+				&& sub_type != ECOMMUNITY_EGRESS_IP
+				&& sub_type != ECOMMUNITY_COMPUTATION_USAGE
+				&& sub_type != ECOMMUNITY_MEMORY_USAGE
+				&& sub_type != ECOMMUNITY_ENABLED) {
 				if (sub_type ==
 				    ECOMMUNITY_FLOWSPEC_REDIRECT_IPV4 &&
 				    type == ECOMMUNITY_ENCODE_IP) {
