@@ -42,6 +42,7 @@
 #include "bgpd/bgp_io.h"
 #include "bgpd/bgp_zebra.h"
 #include "bgpd/bgp_vty.h"
+#include "bgpd/bgp_can.h"
 
 DEFINE_HOOK(peer_backward_transition, (struct peer * peer), (peer));
 DEFINE_HOOK(peer_status_changed, (struct peer * peer), (peer));
@@ -172,6 +173,7 @@ static struct peer *peer_xfer_conn(struct peer *from_peer)
 	 * thread can access peer pointer with fd -1.
 	 */
 	bgp_keepalives_off(keeper);
+	bgp_can_advertise_off(keeper);
 
 	EVENT_OFF(going_away->t_routeadv);
 	EVENT_OFF(going_away->t_connect);
@@ -334,6 +336,7 @@ void bgp_timer_set(struct peer_connection *connection)
 		EVENT_OFF(connection->t_connect);
 		EVENT_OFF(connection->t_holdtime);
 		bgp_keepalives_off(connection);
+		bgp_can_advertise_off(connection);
 		EVENT_OFF(connection->t_routeadv);
 		EVENT_OFF(connection->t_delayopen);
 		break;
@@ -352,6 +355,7 @@ void bgp_timer_set(struct peer_connection *connection)
 
 		EVENT_OFF(connection->t_holdtime);
 		bgp_keepalives_off(connection);
+		bgp_can_advertise_off(connection);
 		EVENT_OFF(connection->t_routeadv);
 		break;
 
@@ -375,6 +379,7 @@ void bgp_timer_set(struct peer_connection *connection)
 		}
 		EVENT_OFF(connection->t_holdtime);
 		bgp_keepalives_off(connection);
+		bgp_can_advertise_off(connection);
 		EVENT_OFF(connection->t_routeadv);
 		break;
 
@@ -389,6 +394,7 @@ void bgp_timer_set(struct peer_connection *connection)
 			EVENT_OFF(connection->t_holdtime);
 		}
 		bgp_keepalives_off(connection);
+		bgp_can_advertise_off(connection);
 		EVENT_OFF(connection->t_routeadv);
 		EVENT_OFF(connection->t_delayopen);
 		break;
@@ -411,6 +417,7 @@ void bgp_timer_set(struct peer_connection *connection)
 			BGP_TIMER_ON(connection->t_holdtime, bgp_holdtime_timer,
 				     peer->v_holdtime);
 			bgp_keepalives_on(connection);
+			bgp_can_advertise_on(connection);
 		}
 		EVENT_OFF(connection->t_routeadv);
 		EVENT_OFF(connection->t_delayopen);
@@ -436,6 +443,7 @@ void bgp_timer_set(struct peer_connection *connection)
 			BGP_TIMER_ON(connection->t_holdtime, bgp_holdtime_timer,
 				     peer->v_holdtime);
 			bgp_keepalives_on(connection);
+			bgp_can_advertise_on(connection);
 		}
 		break;
 	case Deleted:
@@ -453,6 +461,7 @@ void bgp_timer_set(struct peer_connection *connection)
 		EVENT_OFF(connection->t_connect);
 		EVENT_OFF(connection->t_holdtime);
 		bgp_keepalives_off(connection);
+		bgp_can_advertise_off(connection);
 		EVENT_OFF(connection->t_routeadv);
 		EVENT_OFF(connection->t_delayopen);
 		break;
@@ -1469,6 +1478,7 @@ enum bgp_fsm_state_progress bgp_stop(struct peer_connection *connection)
 
 	/* stop keepalives */
 	bgp_keepalives_off(connection);
+	bgp_can_advertise_off(connection);
 
 	/* Stop read and write threads. */
 	bgp_writes_off(connection);
@@ -2236,6 +2246,7 @@ bgp_establish(struct peer_connection *connection)
 		bgp_keepalives_on(connection);
 
 	peer->uptime = monotime(NULL);
+	bgp_can_advertise_on(connection);
 
 	/* Send route-refresh when ORF is enabled.
 	 * Stop Long-lived Graceful Restart timers.
