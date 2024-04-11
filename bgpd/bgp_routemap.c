@@ -60,6 +60,9 @@
 #include "bgpd/bgp_mpath.h"
 #include "bgpd/bgp_script.h"
 
+#include "bgpd/bgp_can.h"
+
+
 #ifdef ENABLE_BGP_VNC
 #include "bgpd/rfapi/bgp_rfapi_cfg.h"
 #endif
@@ -3164,6 +3167,145 @@ static const struct route_map_rule_cmd route_set_ecommunity_soo_cmd = {
 	route_set_ecommunity_soo_compile,
 	route_set_ecommunity_free,
 };
+
+/* set extcommunity sid, eip, com, mem, enabled*/
+
+/* set extcommunity sid */
+
+/* Compile function for set community. */
+
+static void *route_set_ecommunity_sid_compile(const char *arg)
+{
+	struct rmap_ecom_set *rcs;
+	struct ecommunity *ecom;
+
+	ecom = ecommunity_str2com(arg, ECOMMUNITY_SERVICE_ID, 0);
+	if (!ecom)
+		return NULL;
+
+	rcs = XCALLOC(MTYPE_ROUTE_MAP_COMPILED, sizeof(struct rmap_ecom_set));
+	rcs->ecom = ecommunity_intern(ecom);
+	rcs->none = false;
+
+	return rcs;
+}
+
+/* Set community rule structure. */
+static const struct route_map_rule_cmd route_set_ecommunity_sid_cmd = {
+	"extcommunity sid",
+	route_set_ecommunity,
+	route_set_ecommunity_sid_compile,
+	route_set_ecommunity_free,
+};
+
+/* set extcommunity eip */
+
+/* Compile function for set community. */
+static void *route_set_ecommunity_eip_compile(const char *arg)
+{
+	struct rmap_ecom_set *rcs;
+	struct ecommunity *ecom;
+
+	ecom = ecommunity_str2com(arg, ECOMMUNITY_EGRESS_IP, 0);
+	if (!ecom)
+		return NULL;
+
+	rcs = XCALLOC(MTYPE_ROUTE_MAP_COMPILED, sizeof(struct rmap_ecom_set));
+	rcs->ecom = ecommunity_intern(ecom);
+	rcs->none = false;
+
+	return rcs;
+}
+
+/* Set community rule structure. */
+static const struct route_map_rule_cmd route_set_ecommunity_eip_cmd = {
+	"extcommunity eip",
+	route_set_ecommunity,
+	route_set_ecommunity_eip_compile,
+	route_set_ecommunity_free,
+};
+
+/* set extcommunity com */
+
+/* Compile function for set community. */
+static void *route_set_ecommunity_com_compile(const char *arg)
+{
+	struct rmap_ecom_set *rcs;
+	struct ecommunity *ecom;
+
+	ecom = ecommunity_str2com(arg, ECOMMUNITY_COMPUTATION_USAGE, 0);
+	if (!ecom)
+		return NULL;
+
+	rcs = XCALLOC(MTYPE_ROUTE_MAP_COMPILED, sizeof(struct rmap_ecom_set));
+	rcs->ecom = ecommunity_intern(ecom);
+	rcs->none = false;
+
+	return rcs;
+}
+
+/* Set community rule structure. */
+static const struct route_map_rule_cmd route_set_ecommunity_com_cmd = {
+	"extcommunity com",
+	route_set_ecommunity,
+	route_set_ecommunity_com_compile,
+	route_set_ecommunity_free,
+};
+
+/* set extcommunity mem */
+
+/* Compile function for set community. */
+static void *route_set_ecommunity_mem_compile(const char *arg)
+{
+	struct rmap_ecom_set *rcs;
+	struct ecommunity *ecom;
+
+	ecom = ecommunity_str2com(arg, ECOMMUNITY_MEMORY_USAGE, 0);
+	if (!ecom)
+		return NULL;
+
+	rcs = XCALLOC(MTYPE_ROUTE_MAP_COMPILED, sizeof(struct rmap_ecom_set));
+	rcs->ecom = ecommunity_intern(ecom);
+	rcs->none = false;
+
+	return rcs;
+}
+
+/* Set community rule structure. */
+static const struct route_map_rule_cmd route_set_ecommunity_mem_cmd = {
+	"extcommunity mem",
+	route_set_ecommunity,
+	route_set_ecommunity_mem_compile,
+	route_set_ecommunity_free,
+};
+
+/* set extcommunity enabled */
+
+/* Compile function for set community. */
+static void *route_set_ecommunity_enabled_compile(const char *arg)
+{
+	struct rmap_ecom_set *rcs;
+	struct ecommunity *ecom;
+
+	ecom = ecommunity_str2com(arg, ECOMMUNITY_ENABLED, 0);
+	if (!ecom)
+		return NULL;
+
+	rcs = XCALLOC(MTYPE_ROUTE_MAP_COMPILED, sizeof(struct rmap_ecom_set));
+	rcs->ecom = ecommunity_intern(ecom);
+	rcs->none = false;
+
+	return rcs;
+}
+
+/* Set community rule structure. */
+static const struct route_map_rule_cmd route_set_ecommunity_enabled_cmd = {
+	"extcommunity enabled",
+	route_set_ecommunity,
+	route_set_ecommunity_enabled_compile,
+	route_set_ecommunity_free,
+};
+
 
 static void *route_set_ecommunity_nt_compile(const char *arg)
 {
@@ -6842,6 +6984,260 @@ ALIAS_YANG (no_set_ecommunity_soo,
             "GP extended community attribute\n"
             "Site-of-Origin extended community\n")
 
+DEFUN_YANG(set_ecommunity_sid,
+		set_ecommunity_sid_cmd,
+		"set extcommunity sid IP-ADDRESS:0",
+		SET_STR
+		"BGP extended community attribute\n"
+		"SID comstate\n"
+		"IP address format\n")
+{
+	int idx_asn_nn = 3;
+	char *str;
+	int ret;
+	const char *xpath =
+		"./set-action[action='frr-bgp-route-map:set-extcommunity-sid']";
+	char xpath_value[XPATH_MAXLEN];
+
+	nb_cli_enqueue_change(vty, xpath, NB_OP_CREATE, NULL);
+
+	snprintf(xpath_value, sizeof(xpath_value),
+		 "%s/rmap-set-action/frr-bgp-route-map:extcommunity-sid",
+		 xpath);
+	str = argv_concat(argv, argc, idx_asn_nn);
+	nb_cli_enqueue_change(vty, xpath_value, NB_OP_MODIFY, str);
+	ret = nb_cli_apply_changes(vty, NULL);
+	XFREE(MTYPE_TMP, str);
+	return ret;
+
+
+}
+
+DEFUN_YANG(no_set_ecommunity_sid,
+       no_set_ecommunity_sid_cmd,
+       "no set extcommunity sid IP-ADDRESS:0",
+       NO_STR
+       SET_STR
+       "BGP extended community attribute\n"
+       "SID comstate\n"
+       "IP address format\n")
+{
+	const char *xpath =
+		"./set-action[action='frr-bgp-route-map:set-extcommunity-sid']";
+	nb_cli_enqueue_change(vty, xpath, NB_OP_DESTROY, NULL);
+	return nb_cli_apply_changes(vty, NULL);
+}
+
+ALIAS_YANG(no_set_ecommunity_sid,
+       no_set_ecommunity_sid_short_cmd,
+       "no set extcommunity sid",
+       NO_STR
+       SET_STR
+       "BGP extended community attribute\n"
+       "SID comstate\n")
+
+DEFUN_YANG(set_ecommunity_eip,
+       set_ecommunity_eip_cmd,
+       "set extcommunity eip IP-ADDRESS:0",
+       SET_STR
+       "BGP extended community attribute\n"
+       "EIP comstate\n"
+       "Egress Node IP address\n")
+{
+	int idx_asn_nn = 3;
+	char *str;
+	int ret;
+	const char *xpath =
+		"./set-action[action='frr-bgp-route-map:set-extcommunity-eip']";
+	char xpath_value[XPATH_MAXLEN];
+
+	nb_cli_enqueue_change(vty, xpath, NB_OP_CREATE, NULL);
+
+	snprintf(xpath_value, sizeof(xpath_value),
+		 "%s/rmap-set-action/frr-bgp-route-map:extcommunity-eip",
+		 xpath);
+	str = argv_concat(argv, argc, idx_asn_nn);
+	nb_cli_enqueue_change(vty, xpath_value, NB_OP_MODIFY, str);
+	ret = nb_cli_apply_changes(vty, NULL);
+	XFREE(MTYPE_TMP, str);
+	return ret;
+
+
+}
+
+DEFUN_YANG(no_set_ecommunity_eip,
+       no_set_ecommunity_eip_cmd,
+       "no set extcommunity eip IP-ADDRESS:0",
+       NO_STR
+       SET_STR
+       "BGP extended community attribute\n"
+       "EIP comstate\n"
+       "Egress Node IP address\n")
+{
+	const char *xpath =
+		"./set-action[action='frr-bgp-route-map:set-extcommunity-eip']";
+	nb_cli_enqueue_change(vty, xpath, NB_OP_DESTROY, NULL);
+	return nb_cli_apply_changes(vty, NULL);
+}
+
+ALIAS_YANG(no_set_ecommunity_eip,
+       no_set_ecommunity_eip_short_cmd,
+       "no set extcommunity eip",
+       NO_STR
+       SET_STR
+       "BGP extended community attribute\n"
+       "EIP comstate\n")
+
+DEFUN_YANG(set_ecommunity_com,
+       set_ecommunity_com_cmd,
+       "set extcommunity com IP-ADDRESS:0",
+       SET_STR
+       "BGP extended community attribute\n"
+       "Computation usage comstate\n"
+	   "Dotted decimal format float\n")
+{
+	int idx_asn_nn = 3;
+	char *str;
+	int ret;
+	const char *xpath =
+		"./set-action[action='frr-bgp-route-map:set-extcommunity-com']";
+	char xpath_value[XPATH_MAXLEN];
+
+	nb_cli_enqueue_change(vty, xpath, NB_OP_CREATE, NULL);
+
+	snprintf(xpath_value, sizeof(xpath_value),
+		 "%s/rmap-set-action/frr-bgp-route-map:extcommunity-com",
+		 xpath);
+	str = argv_concat(argv, argc, idx_asn_nn);
+	nb_cli_enqueue_change(vty, xpath_value, NB_OP_MODIFY, str);
+	ret = nb_cli_apply_changes(vty, NULL);
+	XFREE(MTYPE_TMP, str);
+	return ret;
+}
+
+DEFUN_YANG(no_set_ecommunity_com,
+       no_set_ecommunity_com_cmd,
+       "no set extcommunity com IP-ADDRESS:0",
+       NO_STR
+       SET_STR
+       "BGP extended community attribute\n"
+       "Computation usage comstate\n"
+       "Dotted decimal format float\n")
+{
+	const char *xpath =
+		"./set-action[action='frr-bgp-route-map:set-extcommunity-com']";
+	nb_cli_enqueue_change(vty, xpath, NB_OP_DESTROY, NULL);
+	return nb_cli_apply_changes(vty, NULL);
+}
+
+ALIAS_YANG(no_set_ecommunity_com,
+       no_set_ecommunity_com_short_cmd,
+       "no set extcommunity com",
+       NO_STR
+       SET_STR
+       "BGP extended community attribute\n"
+       "Computation usage comstate\n")
+
+DEFUN_YANG(set_ecommunity_mem,
+       set_ecommunity_mem_cmd,
+       "set extcommunity mem IP-ADDRESS:0",
+       SET_STR
+       "BGP extended community attribute\n"
+       "Memory usage\n"
+       "Dotted decimal format float\n")
+{
+	int idx_asn_nn = 3;
+	char *str;
+	int ret;
+	const char *xpath =
+		"./set-action[action='frr-bgp-route-map:set-extcommunity-mem']";
+	char xpath_value[XPATH_MAXLEN];
+
+	nb_cli_enqueue_change(vty, xpath, NB_OP_CREATE, NULL);
+
+	snprintf(xpath_value, sizeof(xpath_value),
+		 "%s/rmap-set-action/frr-bgp-route-map:extcommunity-mem",
+		 xpath);
+	str = argv_concat(argv, argc, idx_asn_nn);
+	nb_cli_enqueue_change(vty, xpath_value, NB_OP_MODIFY, str);
+	ret = nb_cli_apply_changes(vty, NULL);
+	XFREE(MTYPE_TMP, str);
+	return ret;
+}
+
+DEFUN_YANG(no_set_ecommunity_mem,
+       no_set_ecommunity_mem_cmd,
+       "no set extcommunity mem IP-ADDRESS:0",
+	   NO_STR
+       SET_STR
+       "BGP extended community attribute\n"
+       "Memory usage\n"
+       "Dotted decimal format float\n")
+{
+	const char *xpath =
+		"./set-action[action='frr-bgp-route-map:set-extcommunity-mem']";
+	nb_cli_enqueue_change(vty, xpath, NB_OP_DESTROY, NULL);
+	return nb_cli_apply_changes(vty, NULL);
+}
+
+ALIAS_YANG(no_set_ecommunity_mem,
+	   no_set_ecommunity_mem_short_cmd,
+       "no set extcommunity mem",
+       NO_STR
+       SET_STR
+       "BGP extended community attribute\n"
+       "Memory usage\n")
+
+DEFUN_YANG(set_ecommunity_enabled,
+       set_ecommunity_enabled_cmd,
+       "set extcommunity enabled IP-ADDRESS:0",
+       SET_STR
+       "BGP extended community attribute\n"
+       "Enabled this entry or not\n"
+       "0.0.0.0|1:0\n")
+{
+	int idx_asn_nn = 3;
+	char *str;
+	int ret;
+	const char *xpath =
+		"./set-action[action='frr-bgp-route-map:set-extcommunity-enabled']";
+	char xpath_value[XPATH_MAXLEN];
+
+	nb_cli_enqueue_change(vty, xpath, NB_OP_CREATE, NULL);
+
+	snprintf(xpath_value, sizeof(xpath_value),
+		 "%s/rmap-set-action/frr-bgp-route-map:extcommunity-enabled",
+		 xpath);
+	str = argv_concat(argv, argc, idx_asn_nn);
+	nb_cli_enqueue_change(vty, xpath_value, NB_OP_MODIFY, str);
+	ret = nb_cli_apply_changes(vty, NULL);
+	XFREE(MTYPE_TMP, str);
+	return ret;
+}
+
+DEFUN_YANG(no_set_ecommunity_enabled,
+       no_set_ecommunity_enabled_cmd,
+       "no set extcommunity enabled IP-ADDRESS:0",
+       NO_STR
+       SET_STR
+       "BGP extended community attribute\n"
+       "Enabled this entry or not\n"
+	   "0.0.0.0|1:0\n")
+{
+	const char *xpath =
+		"./set-action[action='frr-bgp-route-map:set-extcommunity-enabled']";
+	nb_cli_enqueue_change(vty, xpath, NB_OP_DESTROY, NULL);
+	return nb_cli_apply_changes(vty, NULL);
+}
+
+ALIAS_YANG(no_set_ecommunity_enabled,
+       no_set_ecommunity_enabled_short_cmd,
+       "no set extcommunity enabled",
+       NO_STR
+       SET_STR
+       "BGP extended community attribute\n"
+       "Enabled this entry or not\n")
+
 DEFUN_YANG(set_ecommunity_none, set_ecommunity_none_cmd,
 	   "set extcommunity none",
 	   SET_STR
@@ -7899,6 +8295,11 @@ void bgp_route_map_init(void)
 	route_map_install_set(&route_set_ecommunity_rt_cmd);
 	route_map_install_set(&route_set_ecommunity_nt_cmd);
 	route_map_install_set(&route_set_ecommunity_soo_cmd);
+	route_map_install_set(&route_set_ecommunity_sid_cmd);
+	route_map_install_set(&route_set_ecommunity_eip_cmd);
+	route_map_install_set(&route_set_ecommunity_com_cmd);
+	route_map_install_set(&route_set_ecommunity_mem_cmd);
+	route_map_install_set(&route_set_ecommunity_enabled_cmd);
 	route_map_install_set(&route_set_ecommunity_lb_cmd);
 	route_map_install_set(&route_set_ecommunity_color_cmd);
 	route_map_install_set(&route_set_ecommunity_none_cmd);
@@ -8000,6 +8401,21 @@ void bgp_route_map_init(void)
 	install_element(RMAP_NODE, &set_ecommunity_soo_cmd);
 	install_element(RMAP_NODE, &no_set_ecommunity_soo_cmd);
 	install_element(RMAP_NODE, &no_set_ecommunity_soo_short_cmd);
+	install_element(RMAP_NODE, &set_ecommunity_sid_cmd);
+	install_element(RMAP_NODE, &no_set_ecommunity_sid_cmd);
+	install_element(RMAP_NODE, &no_set_ecommunity_sid_short_cmd);
+	install_element(RMAP_NODE, &set_ecommunity_eip_cmd);
+	install_element(RMAP_NODE, &no_set_ecommunity_eip_cmd);
+	install_element(RMAP_NODE, &no_set_ecommunity_eip_short_cmd);
+	install_element(RMAP_NODE, &set_ecommunity_com_cmd);
+	install_element(RMAP_NODE, &no_set_ecommunity_com_cmd);
+	install_element(RMAP_NODE, &no_set_ecommunity_com_short_cmd);
+	install_element(RMAP_NODE, &set_ecommunity_mem_cmd);
+	install_element(RMAP_NODE, &no_set_ecommunity_mem_cmd);
+	install_element(RMAP_NODE, &no_set_ecommunity_mem_short_cmd);
+	install_element(RMAP_NODE, &set_ecommunity_enabled_cmd);
+	install_element(RMAP_NODE, &no_set_ecommunity_enabled_cmd);
+	install_element(RMAP_NODE, &no_set_ecommunity_enabled_short_cmd);
 	install_element(RMAP_NODE, &set_ecommunity_lb_cmd);
 	install_element(RMAP_NODE, &no_set_ecommunity_lb_cmd);
 	install_element(RMAP_NODE, &no_set_ecommunity_lb_short_cmd);
