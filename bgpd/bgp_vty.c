@@ -65,6 +65,8 @@
 #include "bgpd/bgp_mac.h"
 #include "bgpd/bgp_flowspec.h"
 #include "bgpd/bgp_conditional_adv.h"
+#include "bgpd/bgp_can.h"
+
 #ifdef ENABLE_BGP_VNC
 #include "bgpd/rfapi/bgp_rfapi_cfg.h"
 #endif
@@ -604,7 +606,7 @@ int bgp_get_vty(struct bgp **bgp, as_t *as, const char *name,
 
 	if (ret == BGP_CREATED) {
 		bgp_timers_set(NULL, *bgp, DFLT_BGP_KEEPALIVE, DFLT_BGP_HOLDTIME,
-			       DFLT_BGP_CONNECT_RETRY, BGP_DEFAULT_DELAYOPEN);
+			       DFLT_BGP_CONNECT_RETRY, BGP_DEFAULT_DELAYOPEN, BGP_DEFAULT_CAN_ADVERTISE);
 
 		if (DFLT_BGP_IMPORT_CHECK)
 			SET_FLAG((*bgp)->flags, BGP_FLAG_IMPORT_CHECK);
