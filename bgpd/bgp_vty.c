@@ -2656,24 +2656,121 @@ static void bgp_config_write_maxpaths(struct vty *vty, struct bgp *bgp,
 	}
 }
 
-/* BGP timers.  */
+/* config can type */
+DEFUN (config_can_type,
+	   config_can_type_cmd,
+	   "config can type (0-2)",
+	   "Customed configure CAN\n"
+	   "Computation Aware Network\n"
+	   "CAN router type\n"
+	   "0--Intermediate, 1--Ingress node, 2--Egress node\n")
+{
+	struct bgp *bgp;
+	bgp = bgp_get_default();
+	if (!bgp) {
+		vty_out(vty, "%% No such BGP instance exist\n");
+		return CMD_WARNING;
+	}
+	unsigned long type = 0;
+	type = strtoul(argv[3]->arg, NULL, 10);
+	if (type > 2){
+		vty_out(vty, "%% type code must be 0, 1 or 2\n");
+		return CMD_WARNING;
+	}
+	bgp->can_type_code = (int)type;
+	vty_out(vty, "%% This node's type is ");
+	switch(bgp->can_type_code){
+		case CAN_ROUTER_TYPE_INTERMIDIATE:
+			vty_out(vty, "Interemediate node\n");
+			break;
+		case CAN_ROUTER_TYPE_INGRESS_NODE:
+			vty_out(vty, "Ingress node\n");
+			break;
+		case CAN_ROUTER_TYPE_EGRESS_NODE:
+			vty_out(vty, "Egress node\n");
+			break;
+		default:
+			vty_out(vty, "unknown\n");
+			break;
+	}
+	return CMD_SUCCESS;
+}
 
+/* config can restful interface info */
+DEFUN (config_can_if_host,
+	   config_can_if_host_cmd,
+	   "config can if host A.B.C.D",
+	   "Customed configure CAN\n"
+	   "Computation Aware Network\n"
+	   "CAN interface information\n"
+	   "interface host IP address\n"
+	   "IP address format\n"
+	   )
+{
+	struct bgp *bgp = bgp_get_default();
+	if (!(bgp->server_nondefault))
+		bgp->server_nondefault = 1;
+	memset(bgp->server_host, 0, 32);
+	memcpy(bgp->server_host, argv[4]->arg, strlen(argv[4]->arg));
+	return CMD_SUCCESS;
+}
+
+DEFUN (config_can_if_port,
+	   config_can_if_port_cmd,
+	   "config can if port (1-65535)",
+	   "Customed configure CAN\n"
+	   "Computation Aware Network\n"
+	   "CAN interface information\n"
+	   "interface port\n"
+	   "server port number\n")
+{
+	struct bgp *bgp = bgp_get_default();
+	if (!(bgp->server_nondefault))
+		bgp->server_nondefault = 1;
+	bgp->service_port = strtoul(argv[4]->arg, NULL, 10);
+	return CMD_SUCCESS;
+}
+
+/* reset CAN table command  */
+DEFUN (reset_can_table,
+	   reset_can_table_cmd,
+	   "reset can table",
+	   "Reset CAN related table\n"
+	   "Computation Aware Network\n"
+	   "Including: comstate & netstate table\n")
+{
+	struct bgp *bgp = bgp_get_default();
+	int i = 0;
+	for (i = 0;i < bgp->com_table_size;i++)
+		memset(&bgp->com_table_entry[i], 0, sizeof(struct comstate));
+	bgp->com_table_size = 0;
+	for (i = 0;i < bgp->net_table_size;i++)
+		memset(&bgp->net_table_entry[i], 0, sizeof(struct netstate));
+	bgp->net_table_size = 0;
+	return CMD_SUCCESS;
+}
+
+/* BGP timers.  */
 DEFUN (bgp_timers,
        bgp_timers_cmd,
-       "timers bgp (0-65535) (0-65535)",
+       "timers bgp (0-65535) (0-65535) (0-65535)",
        "Adjust routing timers\n"
        "BGP timers\n"
        "Keepalive interval\n"
-       "Holdtime\n")
+       "Holdtime\n"
+	   "CAN advertisement delay\n")
 {
 	VTY_DECLVAR_CONTEXT(bgp, bgp);
 	int idx_number = 2;
 	int idx_number_2 = 3;
+	int idx_number_3 = 4;
 	unsigned long keepalive = 0;
 	unsigned long holdtime = 0;
+	unsigned long can_advertise = 0;
 
 	keepalive = strtoul(argv[idx_number]->arg, NULL, 10);
 	holdtime = strtoul(argv[idx_number_2]->arg, NULL, 10);
+	can_advertise = strtoul(argv[idx_number_3]->arg, NULL, 10);
 
 	/* Holdtime value check. */
 	if (holdtime < 3 && holdtime != 0) {
@@ -2681,9 +2778,14 @@ DEFUN (bgp_timers,
 			"%% hold time value must be either 0 or greater than 3\n");
 		return CMD_WARNING_CONFIG_FAILED;
 	}
+	if (can_advertise < 1 && can_advertise != 0) {
+		vty_out(vty,
+			"%% can advertisement delay value must be either 0 or greater than 1\n");
+		return CMD_WARNING_CONFIG_FAILED;
+	}
 
 	bgp_timers_set(vty, bgp, keepalive, holdtime, DFLT_BGP_CONNECT_RETRY,
-		       BGP_DEFAULT_DELAYOPEN);
+		       BGP_DEFAULT_DELAYOPEN, can_advertise);
 
 	return CMD_SUCCESS;
 }
@@ -2699,7 +2801,7 @@ DEFUN (no_bgp_timers,
 {
 	VTY_DECLVAR_CONTEXT(bgp, bgp);
 	bgp_timers_set(vty, bgp, DFLT_BGP_KEEPALIVE, DFLT_BGP_HOLDTIME,
-		       DFLT_BGP_CONNECT_RETRY, BGP_DEFAULT_DELAYOPEN);
+		       DFLT_BGP_CONNECT_RETRY, BGP_DEFAULT_DELAYOPEN, BGP_DEFAULT_CAN_ADVERTISE);
 
 	return CMD_SUCCESS;
 }
@@ -16139,6 +16241,129 @@ DEFUN (show_ip_bgp_lcommunity_info,
 
 	return CMD_SUCCESS;
 }
+
+/* show [ip] bgp CAN-info */
+DEFUN (show_ip_bgp_can_info, 
+	   show_ip_bgp_can_info_cmd,
+	   "show [ip] bgp can-info", 
+	   SHOW_STR 
+	   IP_STR 
+	   BGP_STR 
+       "CAN information\n")
+{
+	int i;
+	struct bgp *bgp;
+	struct comstate *cs;
+	struct netstate *ns;
+	struct in_addr sid;
+	// struct in_addr *eip;
+	struct can_rib *cr;
+	
+	bgp = bgp_get_default();
+	if (!bgp) {
+		vty_out(vty, "%% No such BGP instance exist\n");
+		return CMD_WARNING;
+	}
+	int cts = bgp->com_table_size;
+	if(cts == 0){
+		vty_out(vty, "\nNo stored comstate information\n");
+	}else{
+		vty_out(vty, "\nComstate table:\n");
+		for(i = 0;i < cts;i++){ 
+			cs = bgp->com_table_entry[i];
+			vty_out(vty, "[%d] SID: %s, ", i + 1, inet_ntoa(cs->sid_addr));
+			vty_out(vty, "EIP: %s, ", inet_ntoa(cs->egress_addr));
+			vty_out(vty, "Computation unit usage: %.2f%%, ", cs->com_usage);
+			vty_out(vty, "Memory usage: %.2f%%, ", cs->mem_usage);
+			vty_out(vty, "Preference: %d\n", cs->pref);
+		}
+	}
+
+	int nts = bgp->net_table_size;
+	if(nts == 0){
+		vty_out(vty, "\nNo stored netstate information\n");
+	}else{
+		vty_out(vty, "\nNetstate table:\n");
+		for(i = 0;i < nts;i++){
+			ns = bgp->net_table_entry[i];
+			vty_out(vty, "[%d] Source: %s, ", i + 1, inet_ntoa(ns->src_addr));
+			vty_out(vty, "Destination: %s, ", inet_ntoa(ns->dest_addr));
+			vty_out(vty, "Delay: %.3fms, ", ns->delay);
+			vty_out(vty, "Jitter: %.3fms, ", ns->jitter);
+			vty_out(vty, "Loss: %.2f%%\n", ns->loss);
+		}
+	}
+
+	int sls = bgp->sid_list_size;
+	if(sls == 0){
+		vty_out(vty, "\nNo registered SID\n");
+	}else{
+		vty_out(vty, "\nRegistered SID list:\n");
+		for(i = 0;i < sls;i++){
+			sid = bgp->sid_list[i];
+			vty_out(vty, "[%d]: %s\n", i + 1, inet_ntoa(sid));
+		}
+	}
+
+	// int els = bgp->eip_list_size;
+	// if(els == 0){
+	// 	vty_out(vty, "\nNo registered EIP\n");
+	// }else{
+	// 	vty_out(vty, "\nRegistered EIP list:\n");
+	// 	for(i = 0;i < els;i++){
+	// 		sid = &(bgp->eip_list[i]);
+	// 		vty_out(vty, "[%d]: %s\n", i + 1, inet_ntoa(eip));
+	// 	}
+	// }
+
+	int crs = bgp->can_rib_size;
+	if(crs == 0){
+		vty_out(vty, "\nEmpty CAN RIB\n");
+	}else{
+		vty_out(vty, "\nCAN RIB:\n");
+		for(i = 0;i < crs;i++){
+			cr = bgp->can_rib_entry[i];
+			vty_out(vty, "[%d] <SID: %s, ", i + 1, inet_ntoa(cr->sid));
+			vty_out(vty, "EIP: %s>\n", inet_ntoa(cr->eip));
+		}
+	}
+
+	vty_out(vty, "\nCAN advertisement cycle: %d s\n", bgp->default_can_advertise);
+	vty_out(vty, "\n");
+
+	vty_out(vty, "This device's type is ");
+	switch (bgp->can_type_code)
+	{
+		case CAN_ROUTER_TYPE_INTERMIDIATE:
+			vty_out(vty, "Interemediate node\n");
+			break;
+		case CAN_ROUTER_TYPE_INGRESS_NODE:
+			vty_out(vty, "Ingress node\n");
+			break;
+		case CAN_ROUTER_TYPE_EGRESS_NODE:
+			vty_out(vty, "Egress node\n");
+			break;
+		default:
+			vty_out(vty, "unknown\n");
+			break;
+	}
+
+	vty_out(vty, "Registered restful information: \n");
+	vty_out(vty, "Host: %s, ", bgp->server_host);
+	vty_out(vty, "POrt: %d\n", bgp->service_port);
+
+
+	if (!bgp->cs_connect_established)
+		vty_out(vty, "\nNo comstate connection established\n");
+	else 
+		vty_out(vty, "\nComstate connection established\n");
+	if (!bgp->ns_connect_established)
+		vty_out(vty, "\nNo netstate connection established\n");
+	else 
+		vty_out(vty, "\nNetstate connection established\n");
+	return CMD_SUCCESS;
+}
+
 /* Graceful Restart */
 
 static void bgp_show_global_graceful_restart_mode_vty(struct vty *vty,
@@ -20013,6 +20238,11 @@ void bgp_vty_init(void)
 	install_element(BGP_NODE, &bgp_timers_cmd);
 	install_element(BGP_NODE, &no_bgp_timers_cmd);
 
+	install_element(BGP_NODE, &config_can_type_cmd);
+	install_element(BGP_NODE, &config_can_if_host_cmd);
+	install_element(BGP_NODE, &config_can_if_port_cmd);
+	install_element(BGP_NODE, &reset_can_table_cmd);
+
 	/* "minimum-holdtime" commands. */
 	install_element(BGP_NODE, &bgp_minimum_holdtime_cmd);
 	install_element(BGP_NODE, &no_bgp_minimum_holdtime_cmd);
@@ -21298,6 +21528,8 @@ void bgp_vty_init(void)
 	install_element(VIEW_NODE, &show_ip_bgp_lcommunity_info_cmd);
 	/* "show [ip] bgp attribute-info" commands. */
 	install_element(VIEW_NODE, &show_ip_bgp_attr_info_cmd);
+	/* "show [ip] bgp can-info" commands. */
+	install_element(VIEW_NODE, &show_ip_bgp_can_info_cmd);
 	/* "show [ip] bgp route-leak" command */
 	install_element(VIEW_NODE, &show_ip_bgp_route_leak_cmd);
 
