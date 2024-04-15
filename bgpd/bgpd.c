@@ -79,6 +79,7 @@
 #include "bgpd/bgp_evpn_mh.h"
 #include "bgpd/bgp_mac.h"
 #include "bgp_trace.h"
+#include "bgpd/bgp_can.h"
 
 DEFINE_MTYPE_STATIC(BGPD, PEER_TX_SHUTDOWN_MSG, "Peer shutdown message (TX)");
 DEFINE_QOBJ_TYPE(bgp_master);
@@ -558,7 +559,7 @@ void bgp_cluster_id_unset(struct bgp *bgp)
 /* BGP timer configuration.  */
 void bgp_timers_set(struct vty *vty, struct bgp *bgp, uint32_t keepalive,
 		    uint32_t holdtime, uint32_t connect_retry,
-		    uint32_t delayopen)
+		    uint32_t delayopen, uint32_t can_advertise)
 {
 	uint32_t default_keepalive = holdtime / 3;
 
@@ -575,6 +576,7 @@ void bgp_timers_set(struct vty *vty, struct bgp *bgp, uint32_t keepalive,
 	bgp->default_holdtime = holdtime;
 	bgp->default_connect_retry = connect_retry;
 	bgp->default_delayopen = delayopen;
+	bgp->default_can_advertise = can_advertise;
 }
 
 /* mostly for completeness - CLI uses its own defaults */
@@ -584,6 +586,7 @@ void bgp_timers_unset(struct bgp *bgp)
 	bgp->default_holdtime = BGP_DEFAULT_HOLDTIME;
 	bgp->default_connect_retry = BGP_DEFAULT_CONNECT_RETRY;
 	bgp->default_delayopen = BGP_DEFAULT_DELAYOPEN;
+	bgp->default_can_advertise = BGP_DEFAULT_CAN_ADVERTISE;
 }
 
 void bgp_tcp_keepalive_set(struct bgp *bgp, uint16_t keepalive_idle,
@@ -2655,6 +2658,7 @@ int peer_delete(struct peer *peer)
 	bgp_soft_reconfig_table_task_cancel(bgp, NULL, peer);
 
 	bgp_keepalives_off(peer->connection);
+	bgp_can_advertise_off(peer->connnect);
 	bgp_reads_off(peer->connection);
 	bgp_writes_off(peer->connection);
 	event_cancel_event_ready(bm->master, peer->connection);
@@ -3536,6 +3540,19 @@ static struct bgp *bgp_create(as_t *as, const char *name,
 	bgp_evpn_init(bgp);
 	bgp_evpn_vrf_es_init(bgp);
 	bgp_pbr_init(bgp);
+
+	bgp->com_table_size = 0;
+	bgp->net_table_size = 0;
+	bgp->sid_list_size = 0;
+	bgp->can_rib_size = 0;
+	bgp->can_type_code = CAN_ROUTER_TYPE_INTERMIDIATE;
+	bgp->server_host = (char *)malloc(32);
+	memset(bgp->server_host, 0, 32);
+	bgp->service_port = 0;
+	bgp->server_nondefault = 0;
+	bgp->cs_connect_established = 0;
+	bgp->ns_connect_established = 0;
+
 	bgp_srv6_init(bgp);
 
 	/*initilize global GR FSM */
@@ -8425,11 +8442,15 @@ static const struct cmd_variable_handler bgp_viewvrf_var_handlers[] = {
 
 struct frr_pthread *bgp_pth_io;
 struct frr_pthread *bgp_pth_ka;
+struct frr_pthread *bgp_pth_can_advertise;
+struct frr_pthread *bgp_pth_can_update;
 
 static void bgp_pthreads_init(void)
 {
 	assert(!bgp_pth_io);
 	assert(!bgp_pth_ka);
+	assert(!bgp_pth_can_advertise);
+	assert(!bgp_pth_can_update);
 
 	struct frr_pthread_attr io = {
 		.start = frr_pthread_attr_default.start,
@@ -8439,18 +8460,32 @@ static void bgp_pthreads_init(void)
 		.start = bgp_keepalives_start,
 		.stop = bgp_keepalives_stop,
 	};
+	struct frr_pthread_attr can_advertise = {
+		.start = bgp_can_advertise_start,
+		.stop = bgp_can_advertise_stop,
+	};
+	struct frr_pthread_attr can_update = {
+		.start = bgp_can_update_start,
+		.stop = bgp_can_update_stop,
+	};
 	bgp_pth_io = frr_pthread_new(&io, "BGP I/O thread", "bgpd_io");
 	bgp_pth_ka = frr_pthread_new(&ka, "BGP Keepalives thread", "bgpd_ka");
+	bgp_pth_can_advertise = frr_pthread_new(&can_advertise, "CAN comstate advertisement thread", "bgpd_ca");
+	bgp_pth_can_update = frr_pthread_new(&can_update, "CAN update thread", "bgpd_cu");
 }
 
 void bgp_pthreads_run(void)
 {
 	frr_pthread_run(bgp_pth_io, NULL);
 	frr_pthread_run(bgp_pth_ka, NULL);
+	frr_pthread_run(bgp_pth_can_advertise, NULL);
+	frr_pthread_run(bgp_pth_can_update, NULL);
 
 	/* Wait until threads are ready. */
 	frr_pthread_wait_running(bgp_pth_io);
 	frr_pthread_wait_running(bgp_pth_ka);
+	frr_pthread_wait_running(bgp_pth_can_advertise);
+	frr_pthread_wait_running(bgp_pth_can_update);
 }
 
 void bgp_pthreads_finish(void)
