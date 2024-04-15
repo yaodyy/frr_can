@@ -96,6 +96,7 @@ enum bgp_af_index {
 
 extern struct frr_pthread *bgp_pth_io;
 extern struct frr_pthread *bgp_pth_ka;
+extern struct frr_pthread *bgp_pth_can_advertise;
 
 /* BGP master for system wide configurations and variables.  */
 struct bgp_master {
@@ -268,6 +269,16 @@ enum bgp_instance_type {
 	BGP_INSTANCE_TYPE_VIEW
 };
 
+/* for bgpd.h */
+#define CAN_COMSTATE_MAXSIZE    1000
+#define CAN_NETSTATE_MAXSIZE    1000
+#define CAN_RIB_MAXSIZE         1000
+#define CAN_SID_LIST_MAXSIZE    1000
+#define SUCCESS_CODE    0
+#define ERROR_CODE      1
+#define PASS_CODE       2
+
+
 #define BGP_SEND_EOR(bgp, afi, safi)                                           \
 	(!CHECK_FLAG(bgp->flags, BGP_FLAG_GR_DISABLE_EOR)                      \
 	 && ((bgp->gr_info[afi][safi].t_select_deferral == NULL)               \
@@ -355,6 +366,39 @@ PREDECL_RBTREE_UNIQ(bgp_mplsvpn_nh_label_bind_cache);
 
 /* BGP instance structure.  */
 struct bgp {
+
+	/* Comstate entry */
+	struct comstate *com_table_entry[CAN_COMSTATE_MAXSIZE];
+	/* Comstate table size */
+	int com_table_size;
+
+	/* Netstate entry */
+    struct netstate *net_table_entry[CAN_NETSTATE_MAXSIZE]; 
+
+    /* Netstate table size */
+    int net_table_size;
+
+	/* Comstate advertisement delay */
+	uint32_t default_can_advertise;
+
+	/* CAN type identification */
+	int can_type_code;
+
+	/* http info */
+	int server_nondefault;
+	char *server_host;
+	int service_port;
+	int cs_connect_established;
+	int ns_connect_established;
+	
+
+	/* Registered info */
+	struct in_addr sid_list[CAN_SID_LIST_MAXSIZE];
+    int sid_list_size;
+    struct can_rib *can_rib_entry[CAN_RIB_MAXSIZE];
+    int can_rib_size;
+
+
 	/* AS number of this BGP instance.  */
 	as_t as;
 	char *as_pretty;
@@ -2307,7 +2351,7 @@ extern void bgp_confederation_peers_remove(struct bgp *bgp, as_t as);
 
 extern void bgp_timers_set(struct vty *vty, struct bgp *, uint32_t keepalive,
 			   uint32_t holdtime, uint32_t connect_retry,
-			   uint32_t delayopen);
+			   uint32_t delayopen, uint32_t can_advertise);
 extern void bgp_timers_unset(struct bgp *);
 
 extern void bgp_default_local_preference_set(struct bgp *bgp,
