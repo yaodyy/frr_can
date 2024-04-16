@@ -2658,7 +2658,7 @@ int peer_delete(struct peer *peer)
 	bgp_soft_reconfig_table_task_cancel(bgp, NULL, peer);
 
 	bgp_keepalives_off(peer->connection);
-	bgp_can_advertise_off(peer->connnect);
+	bgp_can_advertise_off(peer->connection);
 	bgp_reads_off(peer->connection);
 	bgp_writes_off(peer->connection);
 	event_cancel_event_ready(bm->master, peer->connection);
