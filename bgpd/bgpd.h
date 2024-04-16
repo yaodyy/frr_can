@@ -1660,6 +1660,7 @@ struct peer {
 	_Atomic uint32_t thread_flags;
 #define PEER_THREAD_KEEPALIVES_ON (1U << 0)
 #define PEER_THREAD_SUBGRP_ADV_DELAY (1U << 1)
+#define PEER_THREAD_CAN_ADVER_ON (1U << 2)
 
 	/* workqueues */
 	struct work_queue *clear_node_queue;
