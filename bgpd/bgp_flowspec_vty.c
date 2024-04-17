@@ -377,7 +377,7 @@ void route_vty_out_flowspec(struct vty *vty, const struct prefix *p,
 					vty_out(vty, ", ");
 				vty_out(vty, "%s", bpm->ipset_name);
 			}
-			list_delete(&list_bpm);
+			list_frr_delete(&list_bpm);
 		}
 		if (extra->flowspec && extra->flowspec->bgp_fs_iprule &&
 		    listcount(extra->flowspec->bgp_fs_iprule)) {

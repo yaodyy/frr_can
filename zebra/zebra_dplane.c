@@ -867,7 +867,7 @@ static void dplane_ctx_free_internal(struct zebra_dplane_ctx *ctx)
 	case DPLANE_OP_IPTABLE_ADD:
 	case DPLANE_OP_IPTABLE_DELETE:
 		if (ctx->u.iptable.interface_name_list)
-			list_delete(&ctx->u.iptable.interface_name_list);
+			list_frr_delete(&ctx->u.iptable.interface_name_list);
 		break;
 	case DPLANE_OP_GRE_SET:
 	case DPLANE_OP_INTF_NETCONFIG:

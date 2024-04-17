@@ -550,7 +550,7 @@ static struct zebra_fec *fec_add(struct route_table *table, struct prefix *p,
  */
 static int fec_del(struct zebra_fec *fec)
 {
-	list_delete(&fec->client_list);
+	list_frr_delete(&fec->client_list);
 	fec->rn->info = NULL;
 	route_unlock_node(fec->rn);
 	XFREE(MTYPE_FEC, fec);
@@ -3787,7 +3787,7 @@ void zebra_mpls_print_lsp_table(struct vty *vty, struct zebra_vrf *zvrf,
 		ttable_del(tt);
 	}
 
-	list_delete(&lsp_list);
+	list_frr_delete(&lsp_list);
 }
 
 /*
@@ -3872,7 +3872,7 @@ int zebra_mpls_write_lsp_config(struct vty *vty, struct zebra_vrf *zvrf)
 		}
 	}
 
-	list_delete(&slsp_list);
+	list_frr_delete(&slsp_list);
 	return (zvrf->slsp_table->count ? 1 : 0);
 }
 

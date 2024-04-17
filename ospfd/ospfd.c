@@ -91,7 +91,7 @@ static void ospf_free_refresh_queue(struct ospf *ospf)
 				lsa->refresh_list = -1;
 				ospf_lsa_unlock(&lsa);
 			}
-			list_delete(&list);
+			list_frr_delete(&list);
 			ospf->lsa_refresh_queue.qs[i] = NULL;
 		}
 	}
@@ -647,7 +647,7 @@ void ospf_terminate(void)
 	keychain_terminate();
 
 	ospf_opaque_term();
-	list_delete(&om->ospf);
+	list_frr_delete(&om->ospf);
 
 	/* Deliberately go back up, hopefully to thread scheduler, as
 	 * One or more ospf_finish()'s may have deferred shutdown to a timer
@@ -721,7 +721,7 @@ static void ospf_finish_final(struct ospf *ospf)
 	for (ALL_LIST_ELEMENTS(ospf->vlinks, node, nnode, vl_data))
 		ospf_vl_delete(ospf, vl_data);
 
-	list_delete(&ospf->vlinks);
+	list_frr_delete(&ospf->vlinks);
 
 	/* shutdown LDP-Sync */
 	if (ospf->vrf_id == VRF_DEFAULT)
@@ -730,7 +730,7 @@ static void ospf_finish_final(struct ospf *ospf)
 	/* Reset interface. */
 	for (ALL_LIST_ELEMENTS(ospf->oiflist, node, nnode, oi))
 		ospf_if_free(oi);
-	list_delete(&ospf->oiflist);
+	list_frr_delete(&ospf->oiflist);
 	ospf->oi_running = 0;
 
 	/* De-Register VRF */
@@ -885,8 +885,8 @@ static void ospf_finish_final(struct ospf *ospf)
 
 	ospf_free_refresh_queue(ospf);
 
-	list_delete(&ospf->areas);
-	list_delete(&ospf->oi_write_q);
+	list_frr_delete(&ospf->areas);
+	list_frr_delete(&ospf->oi_write_q);
 
 	/* Reset GR helper data structers */
 	ospf_gr_helper_instance_stop(ospf);
@@ -995,7 +995,7 @@ static void ospf_area_free(struct ospf_area *area)
 
 	route_table_finish(area->ranges);
 	route_table_finish(area->nssa_ranges);
-	list_delete(&area->oiflist);
+	list_frr_delete(&area->oiflist);
 
 	if (EXPORT_NAME(area))
 		free(EXPORT_NAME(area));
@@ -1253,7 +1253,7 @@ int ospf_network_unset(struct ospf *ospf, struct prefix_ipv4 *p,
 		ospf_network_run_subnet(ospf, oi->connected, NULL, NULL);
 	}
 
-	list_delete(&ospf_oiflist);
+	list_frr_delete(&ospf_oiflist);
 
 	/* Update connected redistribute. */
 	update_redistributed(ospf, 0); /* interfaces possibly removed */
@@ -1452,7 +1452,7 @@ void ospf_ls_upd_queue_empty(struct ospf_interface *oi)
 		if ((lst = (struct list *)rn->info)) {
 			for (ALL_LIST_ELEMENTS(lst, node, nnode, lsa))
 				ospf_lsa_unlock(&lsa); /* oi->ls_upd_queue */
-			list_delete(&lst);
+			list_frr_delete(&lst);
 			rn->info = NULL;
 		}
 

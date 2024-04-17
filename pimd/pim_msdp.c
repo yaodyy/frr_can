@@ -1193,7 +1193,7 @@ void pim_msdp_mg_free(struct pim_instance *pim, struct pim_msdp_mg **mgp)
 	XFREE(MTYPE_PIM_MSDP_MG_NAME, (*mgp)->mesh_group_name);
 
 	if ((*mgp)->mbr_list)
-		list_delete(&(*mgp)->mbr_list);
+		list_frr_delete(&(*mgp)->mbr_list);
 
 	SLIST_REMOVE(&pim->msdp.mglist, (*mgp), pim_msdp_mg, mg_entry);
 	XFREE(MTYPE_PIM_MSDP_MG, (*mgp));
@@ -1379,13 +1379,13 @@ void pim_msdp_exit(struct pim_instance *pim)
 	hash_clean_and_free(&pim->msdp.peer_hash, NULL);
 
 	if (pim->msdp.peer_list) {
-		list_delete(&pim->msdp.peer_list);
+		list_frr_delete(&pim->msdp.peer_list);
 	}
 
 	hash_clean_and_free(&pim->msdp.sa_hash, NULL);
 
 	if (pim->msdp.sa_list) {
-		list_delete(&pim->msdp.sa_list);
+		list_frr_delete(&pim->msdp.sa_list);
 	}
 
 	if (pim->msdp.work_obuf)

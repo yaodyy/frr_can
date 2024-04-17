@@ -479,7 +479,7 @@ void ls_vertex_del(struct ls_ted *ted, struct ls_vertex *vertex)
 	/* Remove outgoing Edges and list */
 	for (ALL_LIST_ELEMENTS(vertex->outgoing_edges, node, nnode, edge))
 		ls_edge_del_all(ted, edge);
-	list_delete(&vertex->outgoing_edges);
+	list_frr_delete(&vertex->outgoing_edges);
 
 	/* Disconnect incoming Edges and remove list */
 	for (ALL_LIST_ELEMENTS(vertex->incoming_edges, node, nnode, edge)) {
@@ -487,12 +487,12 @@ void ls_vertex_del(struct ls_ted *ted, struct ls_vertex *vertex)
 		if (edge->source == NULL)
 			ls_edge_del_all(ted, edge);
 	}
-	list_delete(&vertex->incoming_edges);
+	list_frr_delete(&vertex->incoming_edges);
 
 	/* Remove subnet and list */
 	for (ALL_LIST_ELEMENTS(vertex->prefixes, node, nnode, subnet))
 		ls_subnet_del_all(ted, subnet);
-	list_delete(&vertex->prefixes);
+	list_frr_delete(&vertex->prefixes);
 
 	/* Then remove Vertex from Link State Data Base and free memory */
 	vertices_del(&ted->vertices, vertex);

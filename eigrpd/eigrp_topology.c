@@ -151,7 +151,7 @@ void eigrp_route_descriptor_add(struct eigrp *eigrp,
 				      l, node->fdistance);
 	}
 
-	list_delete(&l);
+	list_frr_delete(&l);
 }
 
 /*
@@ -180,8 +180,8 @@ void eigrp_prefix_descriptor_delete(struct eigrp *eigrp,
 
 	for (ALL_LIST_ELEMENTS(pe->entries, node, nnode, ne))
 		eigrp_route_descriptor_delete(eigrp, pe, ne);
-	list_delete(&pe->entries);
-	list_delete(&pe->rij);
+	list_frr_delete(&pe->entries);
+	list_frr_delete(&pe->rij);
 	eigrp_zebra_route_delete(eigrp, pe->destination);
 	prefix_free(&pe->destination);
 
@@ -246,7 +246,7 @@ eigrp_topology_table_lookup_ipv4(struct route_table *table,
  * For a future optimization, put the successor list into it's
  * own separate list from the full list?
  *
- * That way we can clean up all the list_new and list_delete's
+ * That way we can clean up all the list_new and list_frr_delete's
  * that we are doing.  DBS
  */
 struct list *
@@ -266,7 +266,7 @@ eigrp_topology_get_successor(struct eigrp_prefix_descriptor *table_node)
 	 * If we have no successors return NULL
 	 */
 	if (!successors->count) {
-		list_delete(&successors);
+		list_frr_delete(&successors);
 		successors = NULL;
 	}
 
@@ -467,7 +467,7 @@ void eigrp_update_routing_table(struct eigrp *eigrp,
 		for (ALL_LIST_ELEMENTS_RO(successors, node, entry))
 			entry->flags |= EIGRP_ROUTE_DESCRIPTOR_INTABLE_FLAG;
 
-		list_delete(&successors);
+		list_frr_delete(&successors);
 	} else {
 		eigrp_zebra_route_delete(eigrp, prefix->destination);
 		for (ALL_LIST_ELEMENTS_RO(prefix->entries, node, entry))

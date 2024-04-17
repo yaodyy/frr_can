@@ -60,7 +60,7 @@ static void clear_ripng_route(struct ripng *ripng)
 		}
 
 		if (list_isempty(list)) {
-			list_delete(&list);
+			list_frr_delete(&list);
 			rp->info = NULL;
 			agg_unlock_node(rp);
 		}

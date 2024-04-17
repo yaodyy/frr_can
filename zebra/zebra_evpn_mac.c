@@ -125,7 +125,7 @@ void zebra_evpn_mac_ifp_del(struct interface *ifp)
 		for (ALL_LIST_ELEMENTS_RO(zif->mac_list, node, zmac)) {
 			zebra_evpn_mac_ifp_unlink(zmac);
 		}
-		list_delete(&zif->mac_list);
+		list_frr_delete(&zif->mac_list);
 	}
 }
 
@@ -1096,7 +1096,7 @@ int zebra_evpn_mac_del(struct zebra_evpn *zevpn, struct zebra_mac *mac)
 		return 0;
 	}
 
-	list_delete(&mac->neigh_list);
+	list_frr_delete(&mac->neigh_list);
 
 	/* Free the VNI hash entry and allocated memory. */
 	tmp_mac = hash_release(zevpn->mac_table, mac);

@@ -20,7 +20,7 @@
 
 void pim_jp_agg_group_list_free(struct pim_jp_agg_group *jag)
 {
-	list_delete(&jag->sources);
+	list_frr_delete(&jag->sources);
 
 	XFREE(MTYPE_PIM_JP_AGG_GROUP, jag);
 }
@@ -84,7 +84,7 @@ void pim_jp_agg_clear_group(struct list *group)
 			js->up = NULL;
 			XFREE(MTYPE_PIM_JP_AGG_SOURCE, js);
 		}
-		list_delete(&jag->sources);
+		list_frr_delete(&jag->sources);
 		listnode_delete(group, jag);
 		XFREE(MTYPE_PIM_JP_AGG_GROUP, jag);
 	}
@@ -158,7 +158,7 @@ void pim_jp_agg_remove_group(struct list *group, struct pim_upstream *up,
 	}
 
 	if (jag->sources->count == 0) {
-		list_delete(&jag->sources);
+		list_frr_delete(&jag->sources);
 		listnode_delete(group, jag);
 		XFREE(MTYPE_PIM_JP_AGG_GROUP, jag);
 	}

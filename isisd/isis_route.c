@@ -287,13 +287,13 @@ static void isis_route_info_delete(struct isis_route_info *route_info)
 
 		route_info->sr_algo[i].nexthops->del =
 			(void (*)(void *))isis_nexthop_delete;
-		list_delete(&route_info->sr_algo[i].nexthops);
+		list_frr_delete(&route_info->sr_algo[i].nexthops);
 	}
 
 	if (route_info->nexthops) {
 		route_info->nexthops->del =
 			(void (*)(void *))isis_nexthop_delete;
-		list_delete(&route_info->nexthops);
+		list_frr_delete(&route_info->nexthops);
 	}
 
 	XFREE(MTYPE_ISIS_ROUTE_INFO, route_info);
@@ -569,7 +569,7 @@ static void set_merge_route_info_sr_algo(struct isis_route_info *mrinfo,
 			    mrinfo->sr_algo[i].nexthops != mrinfo->nexthops) {
 				mrinfo->sr_algo[i].nexthops->del =
 					(void (*)(void *))isis_nexthop_delete;
-				list_delete(&mrinfo->sr_algo[i].nexthops);
+				list_frr_delete(&mrinfo->sr_algo[i].nexthops);
 			}
 
 			mrinfo->sr_algo[i] = rinfo->sr_algo[i];

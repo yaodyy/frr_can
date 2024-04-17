@@ -3898,7 +3898,7 @@ void meta_queue_free(struct meta_queue *mq, struct zebra_vrf *zvrf)
 			break;
 		}
 		if (!zvrf)
-			list_delete(&mq->subq[i]);
+			list_frr_delete(&mq->subq[i]);
 	}
 
 	if (!zvrf)

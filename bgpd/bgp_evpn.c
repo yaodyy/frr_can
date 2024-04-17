@@ -175,7 +175,7 @@ static void vrf_import_rt_free(struct vrf_irt_node *irt)
 	}
 
 	hash_release(bgp_evpn->vrf_import_rt_hash, irt);
-	list_delete(&irt->vrfs);
+	list_frr_delete(&irt->vrfs);
 	XFREE(MTYPE_BGP_EVPN_VRF_IMPORT_RT, irt);
 }
 
@@ -270,7 +270,7 @@ static struct irt_node *import_rt_new(struct bgp *bgp,
 static void import_rt_free(struct bgp *bgp, struct irt_node *irt)
 {
 	hash_release(bgp->import_rt_hash, irt);
-	list_delete(&irt->vnis);
+	list_frr_delete(&irt->vnis);
 	XFREE(MTYPE_BGP_EVPN_IMPORT_RT, irt);
 }
 
@@ -6268,8 +6268,8 @@ void bgp_evpn_free(struct bgp *bgp, struct bgpevpn *vpn)
 	bgp_table_unlock(vpn->ip_table);
 	bgp_table_unlock(vpn->mac_table);
 	bgp_evpn_unmap_vni_from_its_rts(bgp, vpn);
-	list_delete(&vpn->import_rtl);
-	list_delete(&vpn->export_rtl);
+	list_frr_delete(&vpn->import_rtl);
+	list_frr_delete(&vpn->export_rtl);
 	bf_release_index(bm->rd_idspace, vpn->rd_id);
 	hash_release(bgp->vni_svi_hash, vpn);
 	hash_release(bgp->vnihash, vpn);
@@ -7141,9 +7141,9 @@ void bgp_evpn_cleanup(struct bgp *bgp)
 	 */
 	hash_clean_and_free(&bgp->vnihash, NULL);
 
-	list_delete(&bgp->vrf_import_rtl);
-	list_delete(&bgp->vrf_export_rtl);
-	list_delete(&bgp->l2vnis);
+	list_frr_delete(&bgp->vrf_import_rtl);
+	list_frr_delete(&bgp->vrf_export_rtl);
+	list_frr_delete(&bgp->l2vnis);
 
 	if (bgp->evpn_info) {
 		ecommunity_free(&bgp->evpn_info->soo);
@@ -7314,7 +7314,7 @@ static void bgp_evpn_remote_ip_hash_free(struct hash_bucket *bucket, void *args)
 
 	bgp_evpn_remote_ip_process_nexthops(vpn, &ip->addr, false);
 
-	list_delete(&ip->macip_path_list);
+	list_frr_delete(&ip->macip_path_list);
 
 	hash_release(vpn->remote_ip_hash, ip);
 	XFREE(MTYPE_EVPN_REMOTE_IP, ip);
@@ -7398,7 +7398,7 @@ static void bgp_evpn_remote_ip_hash_del(struct bgpevpn *vpn,
 	if (ip->macip_path_list->count == 0) {
 		bgp_evpn_remote_ip_process_nexthops(vpn, &ip->addr, false);
 		hash_release(vpn->remote_ip_hash, ip);
-		list_delete(&ip->macip_path_list);
+		list_frr_delete(&ip->macip_path_list);
 		XFREE(MTYPE_EVPN_REMOTE_IP, ip);
 	}
 }

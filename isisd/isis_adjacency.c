@@ -160,8 +160,8 @@ void isis_delete_adj(void *arg)
 	XFREE(MTYPE_ISIS_ADJACENCY_INFO, adj->ll_ipv6_addrs);
 	XFREE(MTYPE_ISIS_ADJACENCY_INFO, adj->global_ipv6_addrs);
 	adj_mt_finish(adj);
-	list_delete(&adj->adj_sids);
-	list_delete(&adj->srv6_endx_sids);
+	list_frr_delete(&adj->adj_sids);
+	list_frr_delete(&adj->srv6_endx_sids);
 
 	listnode_delete(adj->circuit->area->adjacency_list, adj);
 	XFREE(MTYPE_ISIS_ADJACENCY, adj);

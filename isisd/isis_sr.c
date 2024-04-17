@@ -821,7 +821,7 @@ static void sr_adj_sid_del(struct sr_adjacency *sra)
 	if (sra->type == ISIS_SR_ADJ_BACKUP && sra->backup_nexthops) {
 		sra->backup_nexthops->del =
 			(void (*)(void *))isis_nexthop_delete;
-		list_delete(&sra->backup_nexthops);
+		list_frr_delete(&sra->backup_nexthops);
 	}
 
 	/* Remove Adjacency-SID from the SRDB */
@@ -1298,7 +1298,7 @@ void isis_sr_area_term(struct isis_area *area)
 		isis_sr_stop(area);
 
 	/* Free Adjacency SID list */
-	list_delete(&srdb->adj_sids);
+	list_frr_delete(&srdb->adj_sids);
 
 	/* Clear Prefix-SID configuration. */
 	while (srdb_prefix_cfg_count(&srdb->config.prefix_sids) > 0) {

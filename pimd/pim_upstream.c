@@ -75,7 +75,7 @@ static void pim_upstream_remove_children(struct pim_instance *pim,
 						__func__);
 		}
 	}
-	list_delete(&up->sources);
+	list_frr_delete(&up->sources);
 }
 
 /*
@@ -229,11 +229,11 @@ struct pim_upstream *pim_upstream_del(struct pim_instance *pim,
 
 	for (ALL_LIST_ELEMENTS(up->ifchannels, node, nnode, ch))
 		pim_ifchannel_delete(ch);
-	list_delete(&up->ifchannels);
+	list_frr_delete(&up->ifchannels);
 
 	pim_upstream_remove_children(pim, up);
 	if (up->sources)
-		list_delete(&up->sources);
+		list_frr_delete(&up->sources);
 
 	if (up->parent && up->parent->sources)
 		listnode_delete(up->parent->sources, up);

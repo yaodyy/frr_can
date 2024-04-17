@@ -751,7 +751,7 @@ void fabricd_lsp_free(struct isis_lsp *lsp)
 		if (!lsp->flooding_neighbors[type])
 			continue;
 
-		list_delete(&lsp->flooding_neighbors[type]);
+		list_frr_delete(&lsp->flooding_neighbors[type]);
 	}
 }
 

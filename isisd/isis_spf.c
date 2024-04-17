@@ -241,8 +241,8 @@ static struct isis_vertex *isis_vertex_new(struct isis_spftree *spftree,
 
 void isis_vertex_del(struct isis_vertex *vertex)
 {
-	list_delete(&vertex->Adj_N);
-	list_delete(&vertex->parents);
+	list_frr_delete(&vertex->Adj_N);
+	list_frr_delete(&vertex->parents);
 	hash_clean_and_free(&vertex->firsthops, NULL);
 
 	memset(vertex, 0, sizeof(struct isis_vertex));
@@ -383,14 +383,14 @@ static void _isis_spftree_del(struct isis_spftree *spftree)
 	hash_clean_and_free(&spftree->prefix_sids, NULL);
 	isis_zebra_rlfa_unregister_all(spftree);
 	isis_rlfa_list_clear(spftree);
-	list_delete(&spftree->lfa.remote.pc_spftrees);
+	list_frr_delete(&spftree->lfa.remote.pc_spftrees);
 	if (spftree->type == SPF_TYPE_RLFA
 	    || spftree->type == SPF_TYPE_TI_LFA) {
 		isis_spf_node_list_clear(&spftree->lfa.q_space);
 		isis_spf_node_list_clear(&spftree->lfa.p_space);
 	}
 	isis_spf_node_list_clear(&spftree->adj_nodes);
-	list_delete(&spftree->sadj_list);
+	list_frr_delete(&spftree->sadj_list);
 	isis_vertex_queue_free(&spftree->tents);
 	isis_vertex_queue_free(&spftree->paths);
 	info =  spftree->route_table->info;
@@ -1590,7 +1590,7 @@ static void isis_spf_build_adj_list(struct isis_spftree *spftree,
 	spf_adj_list_parse_lsp(spftree, adj_list, lsp, NULL, 0);
 
 	if (!CHECK_FLAG(spftree->flags, F_SPFTREE_NO_ADJACENCIES))
-		list_delete(&adj_list);
+		list_frr_delete(&adj_list);
 
 	if (spftree->type == SPF_TYPE_REVERSE)
 		spf_adj_get_reverse_metrics(spftree);

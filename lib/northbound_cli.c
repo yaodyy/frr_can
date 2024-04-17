@@ -571,7 +571,7 @@ static void show_dnode_children_cmds(struct vty *vty,
 				nb_cli_show_dnode_cmds(vty, data,
 						       with_defaults);
 
-			list_delete(&sort_list);
+			list_frr_delete(&sort_list);
 			sort_node = NULL;
 		}
 
@@ -600,7 +600,7 @@ static void show_dnode_children_cmds(struct vty *vty,
 		for (ALL_LIST_ELEMENTS_RO(sort_list, listnode, data))
 			nb_cli_show_dnode_cmds(vty, data, with_defaults);
 
-		list_delete(&sort_list);
+		list_frr_delete(&sort_list);
 		sort_node = NULL;
 	}
 }

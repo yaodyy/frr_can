@@ -872,7 +872,7 @@ static int bgp_rpki_fini(void)
 
 	for (ALL_LIST_ELEMENTS(rpki_vrf_list, node, nnode, rpki_vrf)) {
 		stop(rpki_vrf);
-		list_delete(&rpki_vrf->cache_list);
+		list_frr_delete(&rpki_vrf->cache_list);
 
 		close(rpki_vrf->rpki_sync_socket_rtr);
 		close(rpki_vrf->rpki_sync_socket_bgpd);

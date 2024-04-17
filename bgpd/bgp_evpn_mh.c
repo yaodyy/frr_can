@@ -1726,7 +1726,7 @@ static void bgp_evpn_es_frag_free(struct bgp_evpn_es_frag *es_frag)
 	list_delete_node(es->es_frag_list, &es_frag->es_listnode);
 
 	/* EVIs that are advertised using the info in this fragment */
-	list_delete(&es_frag->es_evi_frag_list);
+	list_frr_delete(&es_frag->es_evi_frag_list);
 
 	bf_release_index(bm->rd_idspace, es_frag->rd_id);
 
@@ -1949,12 +1949,12 @@ static void bgp_evpn_es_free(struct bgp_evpn_es *es, const char *caller)
 		zlog_debug("%s: es %s free", caller, es->esi_str);
 
 	/* cleanup resources maintained against the ES */
-	list_delete(&es->es_evi_list);
-	list_delete(&es->es_vrf_list);
-	list_delete(&es->es_vtep_list);
-	list_delete(&es->macip_evi_path_list);
-	list_delete(&es->macip_global_path_list);
-	list_delete(&es->es_frag_list);
+	list_frr_delete(&es->es_evi_list);
+	list_frr_delete(&es->es_vrf_list);
+	list_frr_delete(&es->es_vtep_list);
+	list_frr_delete(&es->macip_evi_path_list);
+	list_frr_delete(&es->macip_global_path_list);
+	list_frr_delete(&es->es_frag_list);
 	bgp_table_unlock(es->route_table);
 
 	/* remove the entry from various databases */
@@ -3580,7 +3580,7 @@ bgp_evpn_es_evi_free(struct bgp_evpn_es_evi *es_evi)
 	RB_REMOVE(bgp_es_evi_rb_head, &vpn->es_evi_rb_tree, es_evi);
 
 	/* free the VTEP list */
-	list_delete(&es_evi->es_evi_vtep_list);
+	list_frr_delete(&es_evi->es_evi_vtep_list);
 
 	/* remove from the VNI-ESI rb tree */
 	XFREE(MTYPE_BGP_EVPN_ES_EVI, es_evi);
@@ -3918,7 +3918,7 @@ void bgp_evpn_vni_es_cleanup(struct bgpevpn *vpn)
 			bgp_evpn_remote_es_evi_flush(es_evi);
 	}
 
-	list_delete(&vpn->local_es_evi_list);
+	list_frr_delete(&vpn->local_es_evi_list);
 }
 
 static char *bgp_evpn_es_evi_vteps_str(char *vtep_str,
@@ -4553,7 +4553,7 @@ static void bgp_evpn_nh_del(struct bgp_evpn_nh *n)
 			   bgp_vrf->name_pretty, n->nh_str);
 
 	bgp_evpn_nh_zebra_update(n, false);
-	list_delete(&n->pi_list);
+	list_frr_delete(&n->pi_list);
 	tmp_n = hash_release(bgp_vrf->evpn_nh_table, n);
 	XFREE(MTYPE_BGP_EVPN_NH, tmp_n);
 }
@@ -4972,9 +4972,9 @@ void bgp_evpn_mh_finish(void)
 	}
 	if (bgp_mh_info->t_cons_check)
 		EVENT_OFF(bgp_mh_info->t_cons_check);
-	list_delete(&bgp_mh_info->local_es_list);
-	list_delete(&bgp_mh_info->pend_es_list);
-	list_delete(&bgp_mh_info->ead_es_export_rtl);
+	list_frr_delete(&bgp_mh_info->local_es_list);
+	list_frr_delete(&bgp_mh_info->pend_es_list);
+	list_frr_delete(&bgp_mh_info->ead_es_export_rtl);
 
 	XFREE(MTYPE_BGP_EVPN_MH_INFO, bgp_mh_info);
 }

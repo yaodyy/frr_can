@@ -247,15 +247,15 @@ void bgp_path_info_extra_free(struct bgp_path_info_extra **extra)
 		peer_unlock(e->vrfleak->peer_orig);
 
 	if (e->aggr_suppressors)
-		list_delete(&e->aggr_suppressors);
+		list_frr_delete(&e->aggr_suppressors);
 
 	if (e->evpn && e->evpn->mh_info)
 		bgp_evpn_path_mh_info_free(e->evpn->mh_info);
 
 	if ((*extra)->flowspec && (*extra)->flowspec->bgp_fs_iprule)
-		list_delete(&((*extra)->flowspec->bgp_fs_iprule));
+		list_frr_delete(&((*extra)->flowspec->bgp_fs_iprule));
 	if ((*extra)->flowspec && (*extra)->flowspec->bgp_fs_pbr)
-		list_delete(&((*extra)->flowspec->bgp_fs_pbr));
+		list_frr_delete(&((*extra)->flowspec->bgp_fs_pbr));
 
 	if (e->evpn)
 		XFREE(MTYPE_BGP_ROUTE_EXTRA_EVPN, e->evpn);
@@ -5442,7 +5442,7 @@ static void bgp_soft_reconfig_table_task(struct event *thread)
 		bgp_announce_route(peer, table->afi, table->safi, false);
 	}
 
-	list_delete(&table->soft_reconfig_peers);
+	list_frr_delete(&table->soft_reconfig_peers);
 }
 
 
@@ -5484,7 +5484,7 @@ void bgp_soft_reconfig_table_task_cancel(const struct bgp *bgp,
 		    || !list_isempty(ntable->soft_reconfig_peers))
 			continue;
 
-		list_delete(&ntable->soft_reconfig_peers);
+		list_frr_delete(&ntable->soft_reconfig_peers);
 		bgp_soft_reconfig_table_flag(ntable, false);
 		EVENT_OFF(ntable->soft_reconfig_thread);
 	}
@@ -7299,7 +7299,7 @@ static bool aggr_unsuppress_path(struct bgp_aggregate *aggregate,
 			zlog_debug("aggregate-address unsuppressing: %pFX",
 				   bgp_dest_get_prefix(pi->net));
 
-		list_delete(&pi->extra->aggr_suppressors);
+		list_frr_delete(&pi->extra->aggr_suppressors);
 		bgp_path_info_set_flag(pi->net, pi, BGP_PATH_ATTR_CHANGED);
 		return true;
 	}

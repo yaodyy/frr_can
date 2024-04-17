@@ -209,7 +209,7 @@ static void isis_vertex_queue_free(struct isis_vertex_queue *queue)
 		skiplist_free(queue->l.slist);
 		queue->l.slist = NULL;
 	} else
-		list_delete(&queue->l.list);
+		list_frr_delete(&queue->l.list);
 }
 
 __attribute__((__unused__))

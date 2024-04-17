@@ -99,7 +99,7 @@ lib_interface_vrrp_vrrp_group_get_next(struct nb_cb_get_next_args *args)
 	curr = NULL;
 
 done:
-	list_delete(&l);
+	list_frr_delete(&l);
 	return curr;
 }
 

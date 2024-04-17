@@ -170,7 +170,7 @@ void pim_ifchannel_delete(struct pim_ifchannel *ch)
 	pim_ifchannel_remove_children(ch);
 
 	if (ch->sources)
-		list_delete(&ch->sources);
+		list_frr_delete(&ch->sources);
 
 	listnode_delete(ch->upstream->ifchannels, ch);
 

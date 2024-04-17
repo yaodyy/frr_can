@@ -57,7 +57,7 @@ static void bgp_mac_hash_free(void *data)
 	struct bgp_self_mac *bsm = data;
 
 	if (bsm->ifp_list)
-		list_delete(&bsm->ifp_list);
+		list_frr_delete(&bsm->ifp_list);
 
 	XFREE(MTYPE_BSM, bsm);
 }
@@ -272,7 +272,7 @@ static void bgp_mac_remove_ifp_internal(struct bgp_self_mac *bsm, char *ifname,
 		struct ethaddr mac = *macaddr;
 
 		hash_release(bm->self_mac_hash, bsm);
-		list_delete(&bsm->ifp_list);
+		list_frr_delete(&bsm->ifp_list);
 		XFREE(MTYPE_BSM, bsm);
 
 		bgp_mac_rescan_all_evpn_tables(&mac);

@@ -1152,7 +1152,7 @@ DEFPY (sharp_srv6_manager_release_locator_chunk,
 	for (ALL_LIST_ELEMENTS_RO(sg.srv6_locators, loc_node, loc)) {
 		if (!strcmp(loc->name, locator_name)) {
 			list_delete_all_node(loc->chunks);
-			list_delete(&loc->chunks);
+			list_frr_delete(&loc->chunks);
 			listnode_delete(sg.srv6_locators, loc);
 			XFREE(MTYPE_SRV6_LOCATOR, loc);
 			break;

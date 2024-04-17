@@ -304,7 +304,7 @@ void label_manager_init(void)
 
 void label_manager_terminate(void)
 {
-	list_delete(&lbl_mgr.lc_list);
+	list_frr_delete(&lbl_mgr.lc_list);
 }
 
 /* alloc and fill a label chunk */
@@ -642,5 +642,5 @@ int lm_client_connect_response(uint8_t proto, uint16_t instance,
 
 void label_manager_close(void)
 {
-	list_delete(&lbl_mgr.lc_list);
+	list_frr_delete(&lbl_mgr.lc_list);
 }

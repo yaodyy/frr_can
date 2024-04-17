@@ -130,7 +130,7 @@ static void zebra_neigh_free(struct zebra_neigh_ent *n)
 			   &n->ip, &n->mac);
 
 	/* cleanup resources maintained against the neigh */
-	list_delete(&n->pbr_rule_list);
+	list_frr_delete(&n->pbr_rule_list);
 
 	RB_REMOVE(zebra_neigh_rb_head, &zneigh_info->neigh_rb_tree, n);
 

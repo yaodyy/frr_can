@@ -495,7 +495,7 @@ void ospf6_delete(struct ospf6 *o)
 		ospf6_area_delete(oa);
 
 
-	list_delete(&o->area_list);
+	list_frr_delete(&o->area_list);
 
 	ospf6_lsdb_delete(o->lsdb);
 	ospf6_lsdb_delete(o->lsdb_self);
@@ -507,7 +507,7 @@ void ospf6_delete(struct ospf6 *o)
 
 	ospf6_distance_reset(o);
 	route_table_finish(o->distance_table);
-	list_delete(&o->oi_write_q);
+	list_frr_delete(&o->oi_write_q);
 
 	if (o->vrf_id != VRF_UNKNOWN) {
 		vrf = vrf_lookup_by_id(o->vrf_id);
@@ -527,7 +527,7 @@ void ospf6_delete(struct ospf6 *o)
 		if (!o->redist[i])
 			continue;
 
-		list_delete(&o->redist[i]);
+		list_frr_delete(&o->redist[i]);
 	}
 
 	XFREE(MTYPE_OSPF6_TOP, o->name);
@@ -576,7 +576,7 @@ void ospf6_master_init(struct event_loop *master)
 
 void ospf6_master_delete(void)
 {
-	list_delete(&om6->ospf6);
+	list_frr_delete(&om6->ospf6);
 }
 
 static void ospf6_maxage_remover(struct event *thread)

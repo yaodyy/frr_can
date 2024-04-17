@@ -344,7 +344,7 @@ void ospf6_area_delete(struct ospf6_area *oa)
 			ospf6_neighbor_delete(on);
 	}
 
-	list_delete(&oa->if_list);
+	list_frr_delete(&oa->if_list);
 
 	ospf6_lsdb_delete(oa->lsdb);
 	ospf6_lsdb_delete(oa->lsdb_self);

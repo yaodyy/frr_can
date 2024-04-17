@@ -122,7 +122,7 @@ static void lsp_destroy(struct isis_lsp *lsp)
 		if (lsp->lspu.frags) {
 			lsp_remove_frags(&lsp->area->lspdb[lsp->level - 1],
 					lsp->lspu.frags);
-			list_delete(&lsp->lspu.frags);
+			list_frr_delete(&lsp->lspu.frags);
 		}
 	} else {
 		if (lsp->lspu.zero_lsp
@@ -1261,7 +1261,7 @@ static void lsp_build(struct isis_lsp *lsp, struct isis_area *area)
 		lsp_debug("ISIS (%s): Adding SRv6 Locator information",
 			  area->area_tag);
 
-		list_delete(&locator.srv6_sid);
+		list_frr_delete(&locator.srv6_sid);
 
 		isis_tlvs_add_ipv6_reach(lsp->tlvs,
 					 isis_area_ipv6_topology(area),
@@ -1479,7 +1479,7 @@ static void lsp_build(struct isis_lsp *lsp, struct isis_area *area)
 		frag->tlvs = tlvs;
 	}
 
-	list_delete(&fragments);
+	list_frr_delete(&fragments);
 	lsp_debug("ISIS (%s): LSP construction is complete. Serializing...",
 		  area->area_tag);
 	return;
@@ -1898,7 +1898,7 @@ static void lsp_build_pseudo(struct isis_lsp *lsp, struct isis_circuit *circuit,
 				area->area_tag, ne_id);
 		}
 	}
-	list_delete(&adj_list);
+	list_frr_delete(&adj_list);
 	return;
 }
 

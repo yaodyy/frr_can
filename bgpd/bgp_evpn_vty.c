@@ -7275,7 +7275,7 @@ void bgp_config_write_evpn_info(struct vty *vty, struct bgp *bgp, afi_t afi,
 		for (ALL_LIST_ELEMENTS_RO(vnilist, ln, data))
 			write_vni_config(vty, data);
 
-		list_delete(&vnilist);
+		list_frr_delete(&vnilist);
 	}
 
 	if (bgp->advertise_autort_rfc8365)

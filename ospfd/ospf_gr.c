@@ -176,7 +176,7 @@ static void ospf_gr_lsa_originate(struct ospf_interface *oi,
 		listnode_add(update, lsa);
 		addr.s_addr = htonl(OSPF_ALLSPFROUTERS);
 		ospf_ls_upd_queue_send(oi, update, addr, true);
-		list_delete(&update);
+		list_frr_delete(&update);
 		ospf_lsa_discard(lsa);
 	} else {
 		/* Install this LSA into LSDB. */

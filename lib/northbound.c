@@ -2149,7 +2149,7 @@ done:
 	if (root)
 		lyd_free_all(root);
 	if (arguments)
-		list_delete(&arguments);
+		list_frr_delete(&arguments);
 
 	return ret;
 }
@@ -2236,7 +2236,7 @@ void nb_running_move_tree(const char *xpath_from, const char *xpath_to)
 			       hash_alloc_intern);
 	}
 
-	list_delete(&entries);
+	list_frr_delete(&entries);
 }
 
 static void *nb_running_unset_entry_helper(const struct lyd_node *dnode)

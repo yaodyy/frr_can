@@ -2549,7 +2549,7 @@ void vty_close(struct vty *vty)
 
 	if (vty->error) {
 		vty->error->del = vty_error_delete;
-		list_delete(&vty->error);
+		list_frr_delete(&vty->error);
 	}
 
 	/* OK free vty. */

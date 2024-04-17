@@ -201,9 +201,9 @@ void isis_circuit_del(struct isis_circuit *circuit)
 	isis_lfa_excluded_ifaces_clear(circuit, ISIS_LEVEL1);
 	isis_lfa_excluded_ifaces_clear(circuit, ISIS_LEVEL2);
 
-	list_delete(&circuit->ip_addrs);
-	list_delete(&circuit->ipv6_link);
-	list_delete(&circuit->ipv6_non_link);
+	list_frr_delete(&circuit->ip_addrs);
+	list_frr_delete(&circuit->ipv6_link);
+	list_frr_delete(&circuit->ipv6_non_link);
 
 	if (circuit->ext) {
 		isis_del_ext_subtlvs(circuit->ext);
@@ -807,7 +807,7 @@ void isis_circuit_down(struct isis_circuit *circuit)
 						adj, adj->adj_state,
 						ISIS_ADJ_DOWN,
 						"circuit is being brought down");
-				list_delete(&adj_list);
+				list_frr_delete(&adj_list);
 			}
 			if (circuit->u.bc.adjdb[1]) {
 				adj_list = list_new();
@@ -818,7 +818,7 @@ void isis_circuit_down(struct isis_circuit *circuit)
 						adj, adj->adj_state,
 						ISIS_ADJ_DOWN,
 						"circuit is being brought down");
-				list_delete(&adj_list);
+				list_frr_delete(&adj_list);
 			}
 		}
 	}
@@ -829,22 +829,22 @@ void isis_circuit_down(struct isis_circuit *circuit)
 	if (circuit->circ_type == CIRCUIT_T_BROADCAST) {
 		/* destroy neighbour lists */
 		if (circuit->u.bc.lan_neighs[0]) {
-			list_delete(&circuit->u.bc.lan_neighs[0]);
+			list_frr_delete(&circuit->u.bc.lan_neighs[0]);
 			circuit->u.bc.lan_neighs[0] = NULL;
 		}
 		if (circuit->u.bc.lan_neighs[1]) {
-			list_delete(&circuit->u.bc.lan_neighs[1]);
+			list_frr_delete(&circuit->u.bc.lan_neighs[1]);
 			circuit->u.bc.lan_neighs[1] = NULL;
 		}
 		/* destroy adjacency databases */
 		if (circuit->u.bc.adjdb[0]) {
 			circuit->u.bc.adjdb[0]->del = isis_delete_adj;
-			list_delete(&circuit->u.bc.adjdb[0]);
+			list_frr_delete(&circuit->u.bc.adjdb[0]);
 			circuit->u.bc.adjdb[0] = NULL;
 		}
 		if (circuit->u.bc.adjdb[1]) {
 			circuit->u.bc.adjdb[1]->del = isis_delete_adj;
-			list_delete(&circuit->u.bc.adjdb[1]);
+			list_frr_delete(&circuit->u.bc.adjdb[1]);
 			circuit->u.bc.adjdb[1] = NULL;
 		}
 		if (circuit->u.bc.is_dr[0]) {
@@ -882,7 +882,7 @@ void isis_circuit_down(struct isis_circuit *circuit)
 	 * and reset snmpd idx generator
 	 */
 	if (circuit->snmp_adj_list != NULL)
-		list_delete(&circuit->snmp_adj_list);
+		list_frr_delete(&circuit->snmp_adj_list);
 
 	circuit->snmp_adj_idx_gen = 0;
 

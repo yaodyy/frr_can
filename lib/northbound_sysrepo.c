@@ -452,8 +452,8 @@ static int frr_sr_config_rpc_cb(sr_session_ctx_t *session, uint32_t sub_id,
 
 exit:
 	/* Release memory. */
-	list_delete(&input);
-	list_delete(&output);
+	list_frr_delete(&input);
+	list_frr_delete(&output);
 
 	return ret;
 }

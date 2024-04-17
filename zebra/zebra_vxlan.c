@@ -1250,7 +1250,7 @@ static int zl3vni_rmac_del(struct zebra_l3vni *zl3vni, struct zebra_mac *zrmac)
 	struct zebra_mac *tmp_rmac;
 
 	/* free the list of nh list*/
-	list_delete(&zrmac->nh_list);
+	list_frr_delete(&zrmac->nh_list);
 
 	tmp_rmac = hash_release(zl3vni->rmac_table, zrmac);
 	XFREE(MTYPE_L3VNI_MAC, tmp_rmac);
@@ -1944,7 +1944,7 @@ static int zl3vni_del(struct zebra_l3vni *zl3vni)
 	struct zebra_l3vni *tmp_zl3vni;
 
 	/* free the list of l2vnis */
-	list_delete(&zl3vni->l2vnis);
+	list_frr_delete(&zl3vni->l2vnis);
 	zl3vni->l2vnis = NULL;
 
 	/* Free the rmac table */

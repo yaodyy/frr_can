@@ -344,7 +344,7 @@ void ospf_ls_upd_timer(struct event *thread)
 		if (listcount(update) > 0)
 			ospf_ls_upd_send(nbr, update, OSPF_SEND_PACKET_DIRECT,
 					 0);
-		list_delete(&update);
+		list_frr_delete(&update);
 	}
 
 	/* Set LS Update retransmission timer. */
@@ -1471,7 +1471,7 @@ static void ospf_ls_req(struct ip *iph, struct ospf_header *ospfh,
 		/* Verify LSA type. */
 		if (ls_type < OSPF_MIN_LSA || ls_type >= OSPF_MAX_LSA) {
 			OSPF_NSM_EVENT_SCHEDULE(nbr, NSM_BadLSReq);
-			list_delete(&ls_upd);
+			list_frr_delete(&ls_upd);
 			return;
 		}
 
@@ -1480,7 +1480,7 @@ static void ospf_ls_req(struct ip *iph, struct ospf_header *ospfh,
 				       adv_router);
 		if (find == NULL) {
 			OSPF_NSM_EVENT_SCHEDULE(nbr, NSM_BadLSReq);
-			list_delete(&ls_upd);
+			list_frr_delete(&ls_upd);
 			return;
 		}
 
@@ -1506,9 +1506,9 @@ static void ospf_ls_req(struct ip *iph, struct ospf_header *ospfh,
 	if (listcount(ls_upd) > 0) {
 		ospf_ls_upd_send(nbr, ls_upd, OSPF_SEND_PACKET_DIRECT, 0);
 
-		list_delete(&ls_upd);
+		list_frr_delete(&ls_upd);
 	} else
-		list_delete(&ls_upd);
+		list_frr_delete(&ls_upd);
 }
 
 /* Get the list of LSAs from Link State Update packet.
@@ -1660,7 +1660,7 @@ static void ospf_upd_list_clean(struct list *lsas)
 	for (ALL_LIST_ELEMENTS(lsas, node, nnode, lsa))
 		ospf_lsa_discard(lsa);
 
-	list_delete(&lsas);
+	list_frr_delete(&lsas);
 }
 
 /* OSPF Link State Update message read -- RFC2328 Section 13. */
@@ -2059,7 +2059,7 @@ static void ospf_ls_upd(struct ospf *ospf, struct ip *iph,
 #undef DISCARD_LSA
 
 	assert(listcount(lsas) == 0);
-	list_delete(&lsas);
+	list_frr_delete(&lsas);
 }
 
 /* OSPF Link State Acknowledgment message read -- RFC2328 Section 13.7. */
@@ -3627,7 +3627,7 @@ void ospf_ls_upd_send_lsa(struct ospf_neighbor *nbr, struct ospf_lsa *lsa,
 	else
 		ospf_ls_upd_send(nbr, update, flag, 0);
 
-	list_delete(&update);
+	list_frr_delete(&update);
 }
 
 /* Determine size for packet. Must be at least big enough to accommodate next
@@ -3800,7 +3800,7 @@ static void ospf_ls_upd_send_queue_event(struct event *thread)
 
 		/* list might not be empty. */
 		if (listcount(update) == 0) {
-			list_delete((struct list **)&rn->info);
+			list_frr_delete((struct list **)&rn->info);
 			route_unlock_node(rn);
 		} else
 			again = 1;

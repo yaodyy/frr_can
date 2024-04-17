@@ -456,7 +456,7 @@ void zebra_evpn_es_evi_cleanup(struct zebra_evpn *zevpn)
 		zebra_evpn_local_es_evi_do_del(es_evi);
 	}
 
-	list_delete(&zevpn->local_es_evi_list);
+	list_frr_delete(&zevpn->local_es_evi_list);
 	zebra_evpn_es_clear_base_evpn(zevpn);
 }
 
@@ -602,7 +602,7 @@ static void zebra_evpn_acc_vl_free(struct zebra_evpn_access_bd *acc_bd)
 		zebra_evpn_mac_svi_del(acc_bd->vlan_zif->ifp, acc_bd->zevpn);
 
 	/* cleanup resources maintained against the ES */
-	list_delete(&acc_bd->mbr_zifs);
+	list_frr_delete(&acc_bd->mbr_zifs);
 
 	/* remove EVI from various tables */
 	hash_release(zmh_info->evpn_vlan_table, acc_bd);
@@ -1910,9 +1910,9 @@ static void zebra_evpn_es_free(struct zebra_evpn_es **esp)
 	zebra_evpn_nhid_free(es->nhg_id, es);
 
 	/* cleanup resources maintained against the ES */
-	list_delete(&es->es_evi_list);
-	list_delete(&es->es_vtep_list);
-	list_delete(&es->mac_list);
+	list_frr_delete(&es->es_evi_list);
+	list_frr_delete(&es->es_vtep_list);
+	list_frr_delete(&es->mac_list);
 
 	/* remove from the VNI-ESI rb tree */
 	RB_REMOVE(zebra_es_rb_head, &zmh_info->es_rb_tree, es);
@@ -3890,7 +3890,7 @@ void zebra_evpn_mh_init(void)
 
 void zebra_evpn_mh_terminate(void)
 {
-	list_delete(&zmh_info->local_es_list);
+	list_frr_delete(&zmh_info->local_es_list);
 
 	hash_iterate(zmh_info->evpn_vlan_table,
 			zebra_evpn_acc_vl_cleanup_all, NULL);

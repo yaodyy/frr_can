@@ -1987,7 +1987,7 @@ static void bgp_redist_del(struct bgp *bgp, afi_t afi, uint8_t type,
 		listnode_delete(bgp->redist[afi][type], red);
 		XFREE(MTYPE_BGP_REDIST, red);
 		if (!bgp->redist[afi][type]->count)
-			list_delete(&bgp->redist[afi][type]);
+			list_frr_delete(&bgp->redist[afi][type]);
 	}
 }
 

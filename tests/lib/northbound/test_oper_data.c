@@ -357,16 +357,16 @@ static void vrf_delete(void *ptr)
 	struct tvrf *vrf = ptr;
 
 	vrf->interfaces->del = interface_delete;
-	list_delete(&vrf->interfaces);
+	list_frr_delete(&vrf->interfaces);
 	vrf->routes->del = route_delete;
-	list_delete(&vrf->routes);
+	list_frr_delete(&vrf->routes);
 	XFREE(MTYPE_TMP, vrf);
 }
 
 static void delete_data(void)
 {
 	vrfs->del = vrf_delete;
-	list_delete(&vrfs);
+	list_frr_delete(&vrfs);
 }
 
 static void vty_do_exit(int isexit)

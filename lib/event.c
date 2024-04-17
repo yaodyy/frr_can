@@ -711,7 +711,7 @@ void event_master_free(struct event_loop *m)
 	frr_with_mutex (&masters_mtx) {
 		listnode_delete(masters, m);
 		if (masters->count == 0)
-			list_delete(&masters);
+			list_frr_delete(&masters);
 	}
 
 	thread_array_free(m, m->read);
@@ -725,7 +725,7 @@ void event_master_free(struct event_loop *m)
 	pthread_cond_destroy(&m->cancel_cond);
 	close(m->io_pipe[0]);
 	close(m->io_pipe[1]);
-	list_delete(&m->cancel_req);
+	list_frr_delete(&m->cancel_req);
 	m->cancel_req = NULL;
 
 	while ((record = cpu_records_pop(m->cpu_records)))

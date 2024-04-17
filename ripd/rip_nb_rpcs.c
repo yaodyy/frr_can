@@ -58,7 +58,7 @@ static void clear_rip_route(struct rip *rip)
 		}
 
 		if (list_isempty(list)) {
-			list_delete(&list);
+			list_frr_delete(&list);
 			rp->info = NULL;
 			route_unlock_node(rp);
 		}

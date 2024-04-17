@@ -67,7 +67,7 @@ static struct config *config_new(void)
 static void config_del(struct config *config)
 {
 	vector_free(config->nested);
-	list_delete(&config->line);
+	list_frr_delete(&config->line);
 	if (config->exit)
 		XFREE(MTYPE_VTYSH_CONFIG_LINE, config->exit);
 	XFREE(MTYPE_VTYSH_CONFIG_LINE, config->name);

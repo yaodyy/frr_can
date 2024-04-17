@@ -549,7 +549,7 @@ void ospf_external_del(struct ospf *ospf, uint8_t type, unsigned short instance)
 		listnode_delete(ospf->external[type], ext);
 
 		if (!ospf->external[type]->count)
-			list_delete(&ospf->external[type]);
+			list_frr_delete(&ospf->external[type]);
 
 		XFREE(MTYPE_OSPF_EXTERNAL, ext);
 	}
@@ -779,7 +779,7 @@ void ospf_redist_del(struct ospf *ospf, uint8_t type, unsigned short instance)
 	if (red) {
 		listnode_delete(ospf->redist[type], red);
 		if (!ospf->redist[type]->count) {
-			list_delete(&ospf->redist[type]);
+			list_frr_delete(&ospf->redist[type]);
 		}
 		ospf_routemap_unset(red);
 		XFREE(MTYPE_OSPF_REDISTRIBUTE, red);

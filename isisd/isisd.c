@@ -235,7 +235,7 @@ void isis_finish(struct isis *isis)
 	XFREE(MTYPE_ISIS_NAME, isis->name);
 
 	isis_redist_free(isis);
-	list_delete(&isis->area_list);
+	list_frr_delete(&isis->area_list);
 	dyn_cache_finish(isis);
 	XFREE(MTYPE_ISIS, isis);
 }
@@ -507,12 +507,12 @@ void isis_area_destroy(struct isis_area *area)
 				       circuit))
 			isis_area_del_circuit(area, circuit);
 
-		list_delete(&area->circuit_list);
+		list_frr_delete(&area->circuit_list);
 	}
 	if (area->flags.free_idcs)
-		list_delete(&area->flags.free_idcs);
+		list_frr_delete(&area->flags.free_idcs);
 
-	list_delete(&area->adjacency_list);
+	list_frr_delete(&area->adjacency_list);
 
 	lsp_db_fini(&area->lspdb[0]);
 	lsp_db_fini(&area->lspdb[1]);
@@ -545,7 +545,7 @@ void isis_area_destroy(struct isis_area *area)
 	if (!CHECK_FLAG(im->options, F_ISIS_UNIT_TEST))
 		isis_redist_area_finish(area);
 
-	list_delete(&area->area_addrs);
+	list_frr_delete(&area->area_addrs);
 
 	for (int i = SPF_PREFIX_PRIO_CRITICAL; i <= SPF_PREFIX_PRIO_MEDIUM;
 	     i++) {

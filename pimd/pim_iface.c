@@ -203,9 +203,9 @@ void pim_if_delete(struct interface *ifp)
 
 	pim_igmp_if_fini(pim_ifp);
 
-	list_delete(&pim_ifp->pim_neighbor_list);
-	list_delete(&pim_ifp->upstream_switch_list);
-	list_delete(&pim_ifp->sec_addr_list);
+	list_frr_delete(&pim_ifp->pim_neighbor_list);
+	list_frr_delete(&pim_ifp->upstream_switch_list);
+	list_frr_delete(&pim_ifp->sec_addr_list);
 
 	if (pim_ifp->bfd_config.profile)
 		XFREE(MTYPE_TMP, pim_ifp->bfd_config.profile);
@@ -1372,7 +1372,7 @@ int pim_if_gm_join_del(struct interface *ifp, pim_addr group_addr,
 	listnode_delete(pim_ifp->gm_join_list, ij);
 	gm_join_free(ij);
 	if (listcount(pim_ifp->gm_join_list) < 1) {
-		list_delete(&pim_ifp->gm_join_list);
+		list_frr_delete(&pim_ifp->gm_join_list);
 		pim_ifp->gm_join_list = 0;
 	}
 

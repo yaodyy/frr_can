@@ -104,7 +104,7 @@ static void zebra_if_node_destroy(route_table_delegate_t *delegate,
 				  struct route_node *node)
 {
 	if (node->info)
-		list_delete((struct list **)&node->info);
+		list_frr_delete((struct list **)&node->info);
 	route_node_destroy(delegate, table, node);
 }
 
@@ -207,7 +207,7 @@ static int if_zebra_delete_hook(struct interface *ifp)
 
 		bond = &zebra_if->bond_info;
 		if (bond && bond->mbr_zifs)
-			list_delete(&bond->mbr_zifs);
+			list_frr_delete(&bond->mbr_zifs);
 
 		zebra_l2_bridge_if_cleanup(ifp);
 		zebra_evpn_if_cleanup(zebra_if);
@@ -413,7 +413,7 @@ int if_subnet_delete(struct interface *ifp, struct connected *ifc)
 	}
 
 	/* Otherwise, free list and route node. */
-	list_delete(&addr_list);
+	list_frr_delete(&addr_list);
 	rn->info = NULL;
 	route_unlock_node(rn);
 
@@ -717,7 +717,7 @@ static void if_delete_connected(struct interface *ifp)
 				}
 
 			/* Free chain list and respective route node. */
-			list_delete(&addr_list);
+			list_frr_delete(&addr_list);
 			rn->info = NULL;
 			route_unlock_node(rn);
 		} else if (cp.family == AF_INET6) {

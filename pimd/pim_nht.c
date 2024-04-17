@@ -178,7 +178,7 @@ static void pim_nht_drop_maybe(struct pim_instance *pim,
 		pim_sendmsg_zebra_rnh(pim, zclient, pnc,
 				      ZEBRA_NEXTHOP_UNREGISTER);
 
-		list_delete(&pnc->rp_list);
+		list_frr_delete(&pnc->rp_list);
 		hash_free(pnc->upstream_hash);
 
 		hash_release(pim->rpf_hash, pnc);

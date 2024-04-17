@@ -145,7 +145,7 @@ static void rip_garbage_collect(struct event *t)
 	/* Unlock route_node. */
 	listnode_delete(rp->info, rinfo);
 	if (list_isempty((struct list *)rp->info)) {
-		list_delete((struct list **)&rp->info);
+		list_frr_delete((struct list **)&rp->info);
 		route_unlock_node(rp);
 	}
 
@@ -3281,7 +3281,7 @@ DEFPY_YANG (clear_ip_rip,
 
 	ret = nb_cli_rpc(vty, "/frr-ripd:clear-rip-route", input, NULL);
 
-	list_delete(&input);
+	list_frr_delete(&input);
 
 	return ret;
 }
@@ -3390,7 +3390,7 @@ void rip_clean(struct rip *rip)
 
 	route_table_finish(rip->table);
 	route_table_finish(rip->neighbor);
-	list_delete(&rip->peer_list);
+	list_frr_delete(&rip->peer_list);
 	distribute_list_delete(&rip->distribute_ctx);
 	if_rmap_ctx_delete(rip->if_rmap_ctx);
 
@@ -3399,7 +3399,7 @@ void rip_clean(struct rip *rip)
 	vector_free(rip->enable_interface);
 	route_table_finish(rip->enable_network);
 	vector_free(rip->passive_nondefault);
-	list_delete(&rip->offset_list_master);
+	list_frr_delete(&rip->offset_list_master);
 	route_table_finish(rip->distance_table);
 
 	RB_REMOVE(rip_instance_head, &rip_instances, rip);
@@ -3553,7 +3553,7 @@ static void rip_instance_disable(struct rip *rip)
 			EVENT_OFF(rinfo->t_garbage_collect);
 			rip_info_free(rinfo);
 		}
-		list_delete(&list);
+		list_frr_delete(&list);
 		rp->info = NULL;
 		route_unlock_node(rp);
 	}

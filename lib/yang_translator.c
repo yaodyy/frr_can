@@ -284,7 +284,7 @@ void yang_translator_unload(struct yang_translator *translator)
 	for (size_t i = 0; i < YANG_TRANSLATE_MAX; i++)
 		hash_clean(translator->mappings[i], yang_mapping_hash_free);
 	translator->modules->del = (void (*)(void *))yang_tmodule_delete;
-	list_delete(&translator->modules);
+	list_frr_delete(&translator->modules);
 	ly_ctx_destroy(translator->ly_ctx);
 	RB_REMOVE(yang_translators, &yang_translators, translator);
 	XFREE(MTYPE_YANG_TRANSLATOR, translator);

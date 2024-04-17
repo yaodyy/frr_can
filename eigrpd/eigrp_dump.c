@@ -234,7 +234,7 @@ void show_ip_eigrp_prefix_descriptor(struct vty *vty,
 		tn->serno);
 
 	if (successors)
-		list_delete(&successors);
+		list_frr_delete(&successors);
 }
 
 void show_ip_eigrp_route_descriptor(struct vty *vty, struct eigrp *eigrp,

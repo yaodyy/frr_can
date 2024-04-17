@@ -1242,7 +1242,7 @@ static void ospf6_redist_del(struct ospf6 *ospf6, struct ospf6_redist *red,
 	if (red) {
 		listnode_delete(ospf6->redist[type], red);
 		if (!ospf6->redist[type]->count) {
-			list_delete(&ospf6->redist[type]);
+			list_frr_delete(&ospf6->redist[type]);
 		}
 		XFREE(MTYPE_OSPF6_REDISTRIBUTE, red);
 		ospf6->redistribute--;

@@ -67,8 +67,8 @@ static void sharp_global_init(void)
 
 static void sharp_global_destroy(void)
 {
-	list_delete(&sg.nhs);
-	list_delete(&sg.srv6_locators);
+	list_frr_delete(&sg.nhs);
+	list_frr_delete(&sg.srv6_locators);
 }
 
 /* Master of threads. */

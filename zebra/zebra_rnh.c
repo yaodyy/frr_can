@@ -207,8 +207,8 @@ void zebra_free_rnh(struct rnh *rnh)
 
 	zebra_rnh_remove_from_routing_table(rnh);
 	rnh->flags |= ZEBRA_NHT_DELETED;
-	list_delete(&rnh->client_list);
-	list_delete(&rnh->zebra_pseudowire_list);
+	list_frr_delete(&rnh->client_list);
+	list_frr_delete(&rnh->zebra_pseudowire_list);
 
 	zvrf = zebra_vrf_lookup_by_id(rnh->vrf_id);
 	table = zvrf->table[family2afi(rnh->resolved_route.family)][rnh->safi];

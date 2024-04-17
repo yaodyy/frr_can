@@ -1252,7 +1252,7 @@ void pim_vxlan_exit(struct pim_instance *pim)
 			    (void (*)(void *))pim_vxlan_sg_del_item);
 
 	if (vxlan_info.work_list)
-		list_delete(&vxlan_info.work_list);
+		list_frr_delete(&vxlan_info.work_list);
 }
 
 void pim_vxlan_terminate(void)

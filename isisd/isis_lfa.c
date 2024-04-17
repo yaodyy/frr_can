@@ -63,7 +63,7 @@ void isis_spf_node_list_clear(struct isis_spf_nodes *nodes)
 		struct isis_spf_node *node = RB_ROOT(isis_spf_nodes, nodes);
 
 		if (node->adjacencies)
-			list_delete(&node->adjacencies);
+			list_frr_delete(&node->adjacencies);
 		if (node->lfa.spftree)
 			isis_spftree_del(node->lfa.spftree);
 		if (node->lfa.spftree_reverse)
@@ -760,7 +760,7 @@ parents:
 					      vertex, used_pnodes,
 					      repair_list_parent);
 		if (ecmp)
-			list_delete(&repair_list_parent);
+			list_frr_delete(&repair_list_parent);
 		if (ret != 0)
 			return ret;
 	}
@@ -957,7 +957,7 @@ int isis_tilfa_check(struct isis_spftree *spftree_pc,
 	ret = tilfa_build_repair_list(spftree_pc, vertex, vertex, NULL,
 				      &used_pnodes, repair_list);
 	isis_spf_node_list_clear(&used_pnodes);
-	list_delete(&repair_list);
+	list_frr_delete(&repair_list);
 	if (ret != 0)
 		zlog_warn(
 			"ISIS-LFA: failed to compute repair path(s) of %s %s w.r.t %s",
@@ -2052,11 +2052,11 @@ isis_lfa_tiebreakers(struct isis_area *area, struct isis_spftree *spftree,
 			 * Ignore this tie-breaker since it excluded all LFAs.
 			 * Move on to the next one (if any).
 			 */
-			list_delete(&tent_lfa_list);
+			list_frr_delete(&tent_lfa_list);
 			break;
 		case 1:
 			/* Finish tie-breaking once we get a single LFA. */
-			list_delete(&filtered_lfa_list);
+			list_frr_delete(&filtered_lfa_list);
 			filtered_lfa_list = tent_lfa_list;
 			return filtered_lfa_list;
 		default:
@@ -2064,7 +2064,7 @@ isis_lfa_tiebreakers(struct isis_area *area, struct isis_spftree *spftree,
 			 * We still have two or more LFAs. Move on to the next
 			 * tie-breaker (if any).
 			 */
-			list_delete(&filtered_lfa_list);
+			list_frr_delete(&filtered_lfa_list);
 			filtered_lfa_list = tent_lfa_list;
 			break;
 		}
@@ -2219,7 +2219,7 @@ void isis_lfa_compute(struct isis_area *area, struct isis_circuit *circuit,
 			if (IS_DEBUG_LFA)
 				zlog_debug(
 					"ISIS-LFA: no valid local LFAs found");
-			list_delete(&lfa_list);
+			list_frr_delete(&lfa_list);
 			continue;
 		}
 
@@ -2239,8 +2239,8 @@ void isis_lfa_compute(struct isis_area *area, struct isis_circuit *circuit,
 		spftree->lfa.protection_counters.lfa[vertex->N.ip.priority] +=
 			1;
 
-		list_delete(&filtered_lfa_list);
-		list_delete(&lfa_list);
+		list_frr_delete(&filtered_lfa_list);
+		list_frr_delete(&lfa_list);
 	}
 }
 

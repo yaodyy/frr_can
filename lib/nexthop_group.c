@@ -601,7 +601,7 @@ static void nhgc_delete(struct nexthop_group_cmd *nhgc)
 
 	RB_REMOVE(nhgc_entry_head, &nhgc_entries, nhgc);
 
-	list_delete(&nhgc->nhg_list);
+	list_frr_delete(&nhgc->nhg_list);
 
 	QOBJ_UNREG(nhgc);
 	XFREE(MTYPE_TMP, nhgc);

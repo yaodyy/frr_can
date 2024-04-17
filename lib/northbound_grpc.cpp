@@ -1049,8 +1049,8 @@ grpc::Status HandleUnaryExecute(
 	    != NB_OK) {
 		flog_warn(EC_LIB_NB_CB_RPC, "%s: rpc callback failed: %s",
 			  __func__, xpath);
-		list_delete(&input_list);
-		list_delete(&output_list);
+		list_frr_delete(&input_list);
+		list_frr_delete(&output_list);
 
 		return grpc::Status(grpc::StatusCode::INTERNAL, "RPC failed");
 	}
@@ -1064,8 +1064,8 @@ grpc::Status HandleUnaryExecute(
 	}
 
 	// Release memory.
-	list_delete(&input_list);
-	list_delete(&output_list);
+	list_frr_delete(&input_list);
+	list_frr_delete(&output_list);
 
 	return grpc::Status::OK;
 }

@@ -43,7 +43,7 @@ void flex_algos_free(struct flex_algos *flex_algos)
 
 	for (ALL_LIST_ELEMENTS(flex_algos->flex_algos, node, nnode, fa))
 		_flex_algo_delete(flex_algos, fa);
-	list_delete(&flex_algos->flex_algos);
+	list_frr_delete(&flex_algos->flex_algos);
 	XFREE(MTYPE_FLEX_ALGO_DATABASE, flex_algos);
 }
 

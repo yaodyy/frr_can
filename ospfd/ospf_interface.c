@@ -352,10 +352,10 @@ void ospf_if_free(struct ospf_interface *oi)
 	route_table_finish(oi->ls_upd_queue);
 
 	/* Free any lists that should be freed */
-	list_delete(&oi->nbr_nbma);
+	list_frr_delete(&oi->nbr_nbma);
 
-	list_delete(&oi->ls_ack);
-	list_delete(&oi->ls_ack_direct.ls_ack);
+	list_frr_delete(&oi->ls_ack);
+	list_frr_delete(&oi->ls_ack_direct.ls_ack);
 
 	if (IS_DEBUG_OSPF_EVENT)
 		zlog_debug("%s: ospf interface %s vrf %s id %u deleted",
@@ -548,7 +548,7 @@ static struct ospf_if_params *ospf_new_if_params(void)
 static void ospf_del_if_params(struct interface *ifp,
 			       struct ospf_if_params *oip)
 {
-	list_delete(&oip->auth_crypt);
+	list_frr_delete(&oip->auth_crypt);
 	XFREE(MTYPE_OSPF_IF_PARAMS, oip->keychain_name);
 	ospf_interface_disable_bfd(ifp, oip);
 	ldp_sync_info_free(&(oip->ldp_sync_info));

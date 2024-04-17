@@ -611,7 +611,7 @@ static void vrrp_router_destroy(struct vrrp_router *r)
 		close(r->sock_tx);
 
 	/* FIXME: also delete list elements */
-	list_delete(&r->addrs);
+	list_frr_delete(&r->addrs);
 	XFREE(MTYPE_VRRP_RTR, r);
 }
 
@@ -1899,7 +1899,7 @@ static int vrrp_autoconfig_if_del(struct interface *ifp)
 			vrrp_vrouter_destroy(vr);
 		}
 
-	list_delete(&vrs);
+	list_frr_delete(&vrs);
 
 	return 0;
 }
@@ -2059,7 +2059,7 @@ void vrrp_autoconfig_off(void)
 		if (vr->autoconf)
 			vrrp_vrouter_destroy(vr);
 
-	list_delete(&ll);
+	list_frr_delete(&ll);
 }
 
 /* Interface tracking ------------------------------------------------------ */
@@ -2157,7 +2157,7 @@ void vrrp_if_up(struct interface *ifp)
 		}
 	}
 
-	list_delete(&vrs);
+	list_frr_delete(&vrs);
 
 	vrrp_autoconfig_if_up(ifp);
 }
@@ -2183,7 +2183,7 @@ void vrrp_if_down(struct interface *ifp)
 		}
 	}
 
-	list_delete(&vrs);
+	list_frr_delete(&vrs);
 
 	vrrp_autoconfig_if_down(ifp);
 }
@@ -2258,7 +2258,7 @@ void vrrp_if_del(struct interface *ifp)
 		}
 	}
 
-	list_delete(&vrs);
+	list_frr_delete(&vrs);
 
 	vrrp_autoconfig_if_del(ifp);
 }
@@ -2281,7 +2281,7 @@ void vrrp_if_address_add(struct interface *ifp)
 	for (ALL_LIST_ELEMENTS_RO(vrs, ln, vr))
 		vrrp_check_start(vr);
 
-	list_delete(&vrs);
+	list_frr_delete(&vrs);
 
 	vrrp_autoconfig_if_address_add(ifp);
 }
@@ -2419,7 +2419,7 @@ void vrrp_fini(void)
 	for (ALL_LIST_ELEMENTS_RO(vrs, ln, vr))
 		vrrp_vrouter_destroy(vr);
 
-	list_delete(&vrs);
+	list_frr_delete(&vrs);
 
 	hash_clean_and_free(&vrrp_vrouters_hash, NULL);
 }

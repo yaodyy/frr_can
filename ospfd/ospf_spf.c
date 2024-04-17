@@ -217,10 +217,10 @@ static void ospf_vertex_free(void *data)
 			   &v->lsa->id);
 
 	if (v->children)
-		list_delete(&v->children);
+		list_frr_delete(&v->children);
 
 	if (v->parents)
-		list_delete(&v->parents);
+		list_frr_delete(&v->parents);
 
 	v->lsa = NULL;
 
@@ -1665,7 +1665,7 @@ void ospf_rtrs_free(struct route_table *rtrs)
 			for (ALL_LIST_ELEMENTS(or_list, node, nnode, or))
 				ospf_route_free(or);
 
-			list_delete(&or_list);
+			list_frr_delete(&or_list);
 
 			/* Unlock the node. */
 			rn->info = NULL;
@@ -1687,7 +1687,7 @@ void ospf_spf_cleanup(struct vertex *spf, struct list *vertex_list)
 
 	/* Free SPF vertices list with deconstructor ospf_vertex_free. */
 	if (vertex_list)
-		list_delete(&vertex_list);
+		list_frr_delete(&vertex_list);
 }
 
 /* Calculating the shortest-path tree for an area, see RFC2328 16.1. */

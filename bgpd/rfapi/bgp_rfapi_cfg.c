@@ -2300,7 +2300,7 @@ static void bgp_rfapi_delete_nve_group(struct vty *vty, /* NULL = no output */
 			listnode_delete(rfg->nves, rfd);
 			listnode_add(orphaned_nves, rfd);
 		}
-		list_delete(&rfg->nves);
+		list_frr_delete(&rfg->nves);
 	}
 
 	/* delete it */
@@ -2377,7 +2377,7 @@ static void bgp_rfapi_delete_nve_group(struct vty *vty, /* NULL = no output */
 			if (vty)
 				vty_out(vty, "\n");
 		}
-		list_delete(&orphaned_nves);
+		list_frr_delete(&orphaned_nves);
 	}
 }
 
@@ -3419,7 +3419,7 @@ static void bgp_rfapi_delete_l2_group(struct vty *vty, /* NULL = no output */
 	if (rfg->rt_export_list)
 		ecommunity_free(&rfg->rt_export_list);
 	if (rfg->labels)
-		list_delete(&rfg->labels);
+		list_frr_delete(&rfg->labels);
 	XFREE(MTYPE_RFAPI_RFP_GROUP_CFG, rfg->rfp_cfg);
 	listnode_delete(bgp->rfapi_cfg->l2_groups, rfg);
 
@@ -3841,14 +3841,14 @@ void bgp_rfapi_cfg_destroy(struct bgp *bgp, struct rfapi_cfg *h)
 	bgp_rfapi_delete_named_nve_group(NULL, bgp, NULL, RFAPI_GROUP_CFG_MAX);
 	bgp_rfapi_delete_named_l2_group(NULL, bgp, NULL);
 	if (h->l2_groups != NULL)
-		list_delete(&h->l2_groups);
-	list_delete(&h->nve_groups_sequential);
+		list_frr_delete(&h->l2_groups);
+	list_frr_delete(&h->nve_groups_sequential);
 
 	h->rfg_export_direct_bgp_l->del = bgp_rfapi_rfgn_list_delete;
-	list_delete(&h->rfg_export_direct_bgp_l);
+	list_frr_delete(&h->rfg_export_direct_bgp_l);
 
 	h->rfg_export_zebra_l->del = bgp_rfapi_rfgn_list_delete;
-	list_delete(&h->rfg_export_zebra_l);
+	list_frr_delete(&h->rfg_export_zebra_l);
 
 	if (h->default_rt_export_list)
 		ecommunity_free(&h->default_rt_export_list);

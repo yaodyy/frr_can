@@ -169,7 +169,7 @@ subgrp_announce_addpath_best_selected(struct bgp_dest *dest,
 	}
 
 	if (list)
-		list_delete(&list);
+		list_frr_delete(&list);
 }
 
 static void subgrp_withdraw_stale_addpath(struct updwalk_context *ctx,

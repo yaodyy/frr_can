@@ -237,7 +237,7 @@ void bgp_lp_finish(void)
 	for (ALL_LIST_ELEMENTS_RO(lp->chunks, node, chunk))
 		bgp_zebra_release_label_range(chunk->first, chunk->last);
 
-	list_delete(&lp->chunks);
+	list_frr_delete(&lp->chunks);
 
 	while ((lf = lp_fifo_pop(&lp->requests))) {
 		check_bgp_lu_cb_unlock(&lf->lcb);

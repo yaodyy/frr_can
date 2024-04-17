@@ -396,7 +396,7 @@ static void pim_mlag_up_peer_del_all(void)
 		}
 	}
 
-	list_delete(&temp);
+	list_frr_delete(&temp);
 }
 
 /* Send upstream entry to the local MLAG daemon (which will subsequently

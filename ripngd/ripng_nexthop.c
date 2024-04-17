@@ -57,7 +57,7 @@ struct list *ripng_rte_new(void)
 
 void ripng_rte_free(struct list *ripng_rte_list)
 {
-	list_delete(&ripng_rte_list);
+	list_frr_delete(&ripng_rte_list);
 }
 
 /* Delete RTE */

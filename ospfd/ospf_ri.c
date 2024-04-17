@@ -154,9 +154,9 @@ static int ospf_router_info_unregister(void)
 void ospf_router_info_term(void)
 {
 
-	list_delete(&OspfRI.area_info);
-	list_delete(&OspfRI.pce_info.pce_domain);
-	list_delete(&OspfRI.pce_info.pce_neighbor);
+	list_frr_delete(&OspfRI.area_info);
+	list_frr_delete(&OspfRI.pce_info.pce_domain);
+	list_frr_delete(&OspfRI.pce_info.pce_neighbor);
 
 	OspfRI.enabled = false;
 

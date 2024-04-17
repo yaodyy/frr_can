@@ -489,7 +489,7 @@ void rfapiRibClear(struct rfapi_descriptor *rfd)
 				 */
 				if (pn->info) {
 					if (pn->info != (void *)1) {
-						list_delete(
+						list_frr_delete(
 							(struct list *
 								 *)(&pn->info));
 					}
@@ -1394,7 +1394,7 @@ callback:
 		}
 
 		delete_list->del = (void (*)(void *))rfapi_info_free;
-		list_delete(&delete_list);
+		list_frr_delete(&delete_list);
 	}
 
 	RFAPI_RIB_CHECK_COUNTS(0, 0);
@@ -1409,7 +1409,7 @@ callback:
 		agg_unlock_node(pn);
 	}
 	if (lPendCost) {
-		list_delete(&lPendCost);
+		list_frr_delete(&lPendCost);
 		pn->info = NULL;
 		agg_unlock_node(pn);
 	}
@@ -1592,7 +1592,7 @@ void rfapiRibUpdatePendingNode(
 	 */
 	if (pn->info) {
 		if (pn->info != (void *)1) {
-			list_delete((struct list **)(&pn->info));
+			list_frr_delete((struct list **)(&pn->info));
 		}
 		pn->info = NULL;
 		agg_unlock_node(pn); /* linklist or 1 deleted */

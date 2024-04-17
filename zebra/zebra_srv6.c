@@ -441,7 +441,7 @@ void zebra_srv6_terminate(void)
 		srv6_locator_free(locator);
 	}
 
-	list_delete(&srv6.locators);
+	list_frr_delete(&srv6.locators);
 }
 
 void zebra_srv6_init(void)

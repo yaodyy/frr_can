@@ -143,7 +143,7 @@ void srv6_locator_free(struct srv6_locator *locator)
 {
 	if (locator) {
 		QOBJ_UNREG(locator);
-		list_delete(&locator->chunks);
+		list_frr_delete(&locator->chunks);
 
 		XFREE(MTYPE_SRV6_LOCATOR, locator);
 	}

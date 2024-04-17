@@ -649,7 +649,7 @@ DEFPY_YANG(vrrp_vrid_show,
 
 	json_object_free(j);
 
-	list_delete(&ll);
+	list_frr_delete(&ll);
 
 	return CMD_SUCCESS;
 }
@@ -698,7 +698,7 @@ DEFPY_YANG(vrrp_vrid_show_summary,
 	XFREE(MTYPE_TMP, table);
 	ttable_del(tt);
 
-	list_delete(&ll);
+	list_frr_delete(&ll);
 
 	return CMD_SUCCESS;
 }

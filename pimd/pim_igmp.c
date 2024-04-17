@@ -993,7 +993,7 @@ void igmp_startup_mode_on(struct gm_sock *igmp)
 
 static void igmp_group_free(struct gm_group *group)
 {
-	list_delete(&group->group_source_list);
+	list_frr_delete(&group->group_source_list);
 
 	XFREE(MTYPE_PIM_IGMP_GROUP, group);
 }
@@ -1153,10 +1153,10 @@ void pim_igmp_if_fini(struct pim_interface *pim_ifp)
 	assert(pim_ifp->gm_group_list);
 	assert(!listcount(pim_ifp->gm_group_list));
 
-	list_delete(&pim_ifp->gm_group_list);
+	list_frr_delete(&pim_ifp->gm_group_list);
 	hash_free(pim_ifp->gm_group_hash);
 
-	list_delete(&pim_ifp->gm_socket_list);
+	list_frr_delete(&pim_ifp->gm_socket_list);
 }
 
 static struct gm_sock *igmp_sock_new(int fd, struct in_addr ifaddr,

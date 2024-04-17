@@ -11,7 +11,7 @@
 #include <sys/uio.h>		// for writev
 
 #include "frr_pthread.h"
-#include "linklist.h"		// for list_delete, list_delete_all_node, lis...
+#include "linklist.h"		// for list_frr_delete, list_delete_all_node, lis...
 #include "log.h"		// for zlog_debug, safe_strerror, zlog_err
 #include "memory.h"		// for MTYPE_TMP, XCALLOC, XFREE
 #include "network.h"		// for ERRNO_IO_RETRY

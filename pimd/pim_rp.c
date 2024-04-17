@@ -45,7 +45,7 @@ void pim_rp_list_hash_clean(void *data)
 {
 	struct pim_nexthop_cache *pnc = (struct pim_nexthop_cache *)data;
 
-	list_delete(&pnc->rp_list);
+	list_frr_delete(&pnc->rp_list);
 
 	hash_clean_and_free(&pnc->upstream_hash, NULL);
 	if (pnc->nexthop)
@@ -100,7 +100,7 @@ void pim_rp_init(struct pim_instance *pim)
 	if (!pim_get_all_mcast_group(&rp_info->group)) {
 		flog_err(EC_LIB_DEVELOPMENT,
 			 "Unable to convert all-multicast prefix");
-		list_delete(&pim->rp_list);
+		list_frr_delete(&pim->rp_list);
 		route_table_finish(pim->rp_table);
 		XFREE(MTYPE_PIM_RP, rp_info);
 		return;
@@ -124,7 +124,7 @@ void pim_rp_free(struct pim_instance *pim)
 	pim->rp_table = NULL;
 
 	if (pim->rp_list)
-		list_delete(&pim->rp_list);
+		list_frr_delete(&pim->rp_list);
 }
 
 /*

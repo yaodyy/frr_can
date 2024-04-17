@@ -232,7 +232,7 @@ void zebra_l2if_update_bond(struct interface *ifp, bool add)
 		for (ALL_LIST_ELEMENTS(bond->mbr_zifs, node, nnode, bond_mbr))
 			zebra_l2_unmap_slave_from_bond(bond_mbr);
 
-		list_delete(&bond->mbr_zifs);
+		list_frr_delete(&bond->mbr_zifs);
 	}
 }
 

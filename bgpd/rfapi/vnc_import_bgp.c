@@ -2302,7 +2302,7 @@ void vnc_import_bgp_exterior_add_route_interior(
 			skiplist_delete(it->monitor_exterior_orphans,
 					an_bpi_exterior, NULL);
 		}
-		list_delete(&list_adopted);
+		list_frr_delete(&list_adopted);
 	}
 }
 

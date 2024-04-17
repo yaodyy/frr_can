@@ -570,7 +570,7 @@ void isis_redist_area_finish(struct isis_area *area)
 					listnode_delete(redist_list, redist);
 					XFREE(MTYPE_ISIS_REDISTRIBUTE, redist);
 				}
-				list_delete(&redist_list);
+				list_frr_delete(&redist_list);
 			}
 			if (!area->ext_reach[protocol][level])
 				continue;

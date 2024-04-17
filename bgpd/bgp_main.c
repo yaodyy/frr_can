@@ -252,8 +252,8 @@ static __attribute__((__noreturn__)) void bgp_exit(int status)
 	bgp_zebra_destroy();
 
 	bf_free(bm->rd_idspace);
-	list_delete(&bm->bgp);
-	list_delete(&bm->addresses);
+	list_frr_delete(&bm->bgp);
+	list_frr_delete(&bm->addresses);
 
 	bgp_lp_finish();
 

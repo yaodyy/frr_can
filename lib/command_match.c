@@ -263,7 +263,7 @@ static enum matcher_rv command_match_r(struct graph_node *start, vector vline,
 					vector_slot(gn->to, 0);
 				// last node in the list will hold the
 				// cmd_element; this is important because
-				// list_delete() expects that all nodes have
+				// list_frr_delete() expects that all nodes have
 				// the same data type, so when deleting this
 				// list the last node must be manually deleted
 				struct cmd_element *el = leaf->data;
@@ -327,7 +327,7 @@ static enum matcher_rv command_match_r(struct graph_node *start, vector vline,
 		status = MATCHER_INCOMPLETE;
 
 	// cleanup
-	list_delete(&next);
+	list_frr_delete(&next);
 
 	return status;
 }
@@ -361,7 +361,7 @@ enum matcher_rv command_complete(struct graph *graph, vector vline,
 
 	unsigned int idx;
 	for (idx = 0; idx < vector_active(vline) && next->count > 0; idx++) {
-		list_delete(&current);
+		list_frr_delete(&current);
 		current = next;
 		next = list_new();
 		next->del = stack_del;
@@ -451,8 +451,8 @@ enum matcher_rv command_complete(struct graph *graph, vector vline,
 		}
 	}
 
-	list_delete(&current);
-	list_delete(&next);
+	list_frr_delete(&current);
+	list_frr_delete(&next);
 
 	return mrv;
 }
@@ -671,7 +671,7 @@ static void del_arglist(struct list *list)
 	list_delete_node(list, tail);
 
 	// delete the rest of the list as usual
-	list_delete(&list);
+	list_frr_delete(&list);
 }
 
 /*---------- token level matching functions ----------*/

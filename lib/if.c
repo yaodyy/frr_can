@@ -268,7 +268,7 @@ void if_delete(struct interface **ifp)
 	if_delete_retain(ptr);
 
 	if_connected_fini(ptr->connected);
-	list_delete(&ptr->nbr_connected);
+	list_frr_delete(&ptr->nbr_connected);
 
 	if_link_params_free(ptr);
 
@@ -538,7 +538,7 @@ size_t if_lookup_by_hwaddr(const uint8_t *hw_addr, size_t addrsz,
 
 	int count = rs->count;
 
-	list_delete(&rs);
+	list_frr_delete(&rs);
 
 	return count;
 }

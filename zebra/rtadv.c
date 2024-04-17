@@ -1826,8 +1826,8 @@ void rtadv_if_fini(struct zebra_if *zif)
 	while ((rp = rtadv_prefixes_pop(rtadv->prefixes)))
 		rtadv_prefix_free(rp);
 
-	list_delete(&rtadv->AdvRDNSSList);
-	list_delete(&rtadv->AdvDNSSLList);
+	list_frr_delete(&rtadv->AdvRDNSSList);
+	list_frr_delete(&rtadv->AdvDNSSLList);
 }
 
 void rtadv_vrf_init(struct zebra_vrf *zvrf)

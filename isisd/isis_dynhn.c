@@ -51,7 +51,7 @@ void dyn_cache_finish(struct isis *isis)
 		XFREE(MTYPE_ISIS_DYNHN, dyn);
 	}
 
-	list_delete(&isis->dyn_cache);
+	list_frr_delete(&isis->dyn_cache);
 }
 
 static void dyn_cache_cleanup(struct event *thread)

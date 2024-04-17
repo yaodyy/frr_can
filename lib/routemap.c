@@ -1098,7 +1098,7 @@ static int vty_show_route_map(struct vty *vty, const char *name, bool use_json)
 		for (ALL_LIST_ELEMENTS_RO(maplist, ln, map))
 			vty_show_route_map_entry(vty, map, json);
 
-		list_delete(&maplist);
+		list_frr_delete(&maplist);
 	}
 
 	return vty_json(vty, json);
@@ -1129,7 +1129,7 @@ static int vty_show_unused_route_map(struct vty *vty)
 		vty_out(vty, "\n%s: None\n", frr_protonameinst);
 	}
 
-	list_delete(&maplist);
+	list_frr_delete(&maplist);
 	return CMD_SUCCESS;
 }
 
@@ -2000,7 +2000,7 @@ static void route_map_pfx_table_del_default(afi_t afi,
 	listnode_delete(rmap_candidate_list, index);
 
 	if (listcount(rmap_candidate_list) == 0) {
-		list_delete(&rmap_candidate_list);
+		list_frr_delete(&rmap_candidate_list);
 		rn->info = NULL;
 		route_unlock_node(rn);
 	}
@@ -2058,7 +2058,7 @@ static void route_map_pfx_table_del(struct route_table *table,
 	listnode_delete(rmap_candidate_list, index);
 
 	if (listcount(rmap_candidate_list) == 0) {
-		list_delete(&rmap_candidate_list);
+		list_frr_delete(&rmap_candidate_list);
 		rn->info = NULL;
 		route_unlock_node(rn);
 	}

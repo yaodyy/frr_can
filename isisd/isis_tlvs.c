@@ -178,7 +178,7 @@ void isis_del_ext_subtlvs(struct isis_ext_subtlvs *ext)
 	for (ALL_LIST_ELEMENTS(ext->aslas, node, nnode, asla))
 		isis_tlvs_del_asla_flex_algo(ext, asla);
 
-	list_delete(&ext->aslas);
+	list_frr_delete(&ext->aslas);
 
 	admin_group_term(&ext->ext_admin_group);
 
@@ -7024,7 +7024,7 @@ struct list *isis_fragment_tlvs(struct isis_tlvs *tlvs, size_t size)
 		struct listnode *node;
 		for (ALL_LIST_ELEMENTS_RO(rv, node, fragment_tlvs))
 			isis_free_tlvs(fragment_tlvs);
-		list_delete(&rv);
+		list_frr_delete(&rv);
 	}
 
 	stream_free(dummy_stream);

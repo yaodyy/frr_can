@@ -72,7 +72,7 @@ static struct c_path *cpath_copy(struct c_path *dest, const struct c_path *src)
 	} else {
 		new_path = dest;
 		if (dest->edges)
-			list_delete(&new_path->edges);
+			list_frr_delete(&new_path->edges);
 	}
 
 	new_path->dst = src->dst;
@@ -94,7 +94,7 @@ void cpath_del(struct c_path *path)
 		return;
 
 	if (path->edges)
-		list_delete(&path->edges);
+		list_frr_delete(&path->edges);
 
 	XFREE(MTYPE_PCA, path);
 	path = NULL;
@@ -111,7 +111,7 @@ static void cpath_replace(struct c_path *next_path, struct c_path *cur_path)
 {
 
 	if (next_path->edges)
-		list_delete(&next_path->edges);
+		list_frr_delete(&next_path->edges);
 
 	next_path->edges = list_dup(cur_path->edges);
 }

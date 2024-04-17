@@ -177,7 +177,7 @@ void ospf_apiserver_term(void)
 
 	/* Free client list itself */
 	if (apiserver_list)
-		list_delete(&apiserver_list);
+		list_frr_delete(&apiserver_list);
 
 	/* Free wildcard list */
 	/* XXX  */
@@ -328,7 +328,7 @@ void ospf_apiserver_free(struct ospf_apiserver *apiserv)
 		ospf_apiserver_unregister_opaque_type(
 			apiserv, regtype->lsa_type, regtype->opaque_type);
 	}
-	list_delete(&apiserv->opaque_types);
+	list_frr_delete(&apiserv->opaque_types);
 
 	/* Close connections to OSPFd. */
 	if (apiserv->fd_sync > 0) {

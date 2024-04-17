@@ -398,7 +398,7 @@ void eigrp_update_receive(struct eigrp *eigrp, struct ip *iph,
 	eigrp_update_send_all(eigrp, ei);
 
 	if (nbr_prefixes)
-		list_delete(&nbr_prefixes);
+		list_frr_delete(&nbr_prefixes);
 }
 
 /*send EIGRP Update packet*/

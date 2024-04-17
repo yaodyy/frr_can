@@ -541,7 +541,7 @@ void srv6_endx_sid_del(struct srv6_adjacency *sra)
 	if (sra->type == ISIS_SRV6_LAN_BACKUP && sra->backup_nexthops) {
 		sra->backup_nexthops->del =
 			(void (*)(void *))isis_nexthop_delete;
-		list_delete(&sra->backup_nexthops);
+		list_frr_delete(&sra->backup_nexthops);
 	}
 
 	/* Remove Adjacency-SID from the SRDB */
@@ -830,11 +830,11 @@ void isis_srv6_area_term(struct isis_area *area)
 	/* Free SRv6 Locator chunks list */
 	for (ALL_LIST_ELEMENTS(srv6db->srv6_locator_chunks, node, nnode, chunk))
 		srv6_locator_chunk_free(&chunk);
-	list_delete(&srv6db->srv6_locator_chunks);
+	list_frr_delete(&srv6db->srv6_locator_chunks);
 
 	/* Free SRv6 SIDs list */
-	list_delete(&srv6db->srv6_sids);
-	list_delete(&srv6db->srv6_endx_sids);
+	list_frr_delete(&srv6db->srv6_sids);
+	list_frr_delete(&srv6db->srv6_endx_sids);
 }
 
 /**

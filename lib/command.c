@@ -624,7 +624,7 @@ static vector cmd_complete_command_real(vector vline, struct vty *vty,
 	}
 
 	vector comps = completions_to_vec(completions);
-	list_delete(&completions);
+	list_frr_delete(&completions);
 
 	// set status code appropriately
 	switch (vector_active(comps)) {
@@ -948,7 +948,7 @@ static int cmd_execute_command_real(vector vline, struct vty *vty,
 	// if matcher error, return corresponding CMD_ERR
 	if (MATCHER_ERROR(status)) {
 		if (argv_list)
-			list_delete(&argv_list);
+			list_frr_delete(&argv_list);
 		switch (status) {
 		case MATCHER_INCOMPLETE:
 			return CMD_ERR_INCOMPLETE;
@@ -1003,7 +1003,7 @@ static int cmd_execute_command_real(vector vline, struct vty *vty,
 	}
 
 	// delete list and cmd_token's in it
-	list_delete(&argv_list);
+	list_frr_delete(&argv_list);
 	XFREE(MTYPE_TMP, argv);
 
 	return ret;
@@ -2643,6 +2643,6 @@ void cmd_terminate(void)
 	XFREE(MTYPE_HOST, host.config);
 	XFREE(MTYPE_HOST, host.motd);
 
-	list_delete(&varhandlers);
+	list_frr_delete(&varhandlers);
 	qobj_finish();
 }

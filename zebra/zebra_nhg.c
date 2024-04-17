@@ -3597,7 +3597,7 @@ unsigned long zebra_nhg_score_proto(int type)
 	}
 
 	count = iter.found->count;
-	list_delete(&iter.found);
+	list_frr_delete(&iter.found);
 
 	return count;
 }

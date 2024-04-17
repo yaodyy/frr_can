@@ -1477,9 +1477,9 @@ static void bgp_srv6_init(struct bgp *bgp)
 static void bgp_srv6_cleanup(struct bgp *bgp)
 {
 	if (bgp->srv6_locator_chunks)
-		list_delete(&bgp->srv6_locator_chunks);
+		list_frr_delete(&bgp->srv6_locator_chunks);
 	if (bgp->srv6_functions)
-		list_delete(&bgp->srv6_functions);
+		list_frr_delete(&bgp->srv6_functions);
 }
 
 /* Allocate new peer object, implicitely locked.  */
@@ -3067,14 +3067,14 @@ int peer_group_delete(struct peer_group *group)
 			peer_delete(other);
 		}
 	}
-	list_delete(&group->peer);
+	list_frr_delete(&group->peer);
 
 	for (afi = AFI_IP; afi < AFI_MAX; afi++) {
 		for (ALL_LIST_ELEMENTS(group->listen_range[afi], node, nnode,
 				       prefix)) {
 			prefix_free(&prefix);
 		}
-		list_delete(&group->listen_range[afi]);
+		list_frr_delete(&group->listen_range[afi]);
 	}
 
 	XFREE(MTYPE_PEER_GROUP_HOST, group->name);
@@ -4088,8 +4088,8 @@ void bgp_free(struct bgp *bgp)
 
 	QOBJ_UNREG(bgp);
 
-	list_delete(&bgp->group);
-	list_delete(&bgp->peer);
+	list_frr_delete(&bgp->group);
+	list_frr_delete(&bgp->peer);
 
 	if (bgp->peerhash) {
 		hash_free(bgp->peerhash);
@@ -4130,9 +4130,9 @@ void bgp_free(struct bgp *bgp)
 		enum vpn_policy_direction dir;
 
 		if (bgp->vpn_policy[afi].import_vrf)
-			list_delete(&bgp->vpn_policy[afi].import_vrf);
+			list_frr_delete(&bgp->vpn_policy[afi].import_vrf);
 		if (bgp->vpn_policy[afi].export_vrf)
-			list_delete(&bgp->vpn_policy[afi].export_vrf);
+			list_frr_delete(&bgp->vpn_policy[afi].export_vrf);
 
 		dir = BGP_VPN_POLICY_DIR_FROMVPN;
 		if (bgp->vpn_policy[afi].rtlist[dir])
@@ -8619,7 +8619,7 @@ void bgp_terminate(void)
 	}
 
 	if (bm->listen_sockets)
-		list_delete(&bm->listen_sockets);
+		list_frr_delete(&bm->listen_sockets);
 
 	EVENT_OFF(bm->t_rmap_update);
 	EVENT_OFF(bm->t_bgp_sync_label_manager);

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: ISC
 
 #
-# bgp_comm-list_delete.py
+# bgp_comm-list_frr_delete.py
 # Part of NetDEF Topology Tests
 #
 # Copyright (c) 2019 by
@@ -10,7 +10,7 @@
 #
 
 """
-bgp_comm-list_delete.py:
+bgp_comm-list_frr_delete.py:
 
 Test if works the following commands:
 route-map test permit 10

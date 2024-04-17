@@ -393,7 +393,7 @@ static void _zebra_pbr_iptable_free_all(void *arg, bool all)
 			XFREE(MTYPE_PBR_IPTABLE_IFNAME, name);
 			list_delete_node(iptable->interface_name_list, node);
 		}
-		list_delete(&iptable->interface_name_list);
+		list_frr_delete(&iptable->interface_name_list);
 	}
 	XFREE(MTYPE_PBR_OBJ, iptable);
 }
@@ -1049,7 +1049,7 @@ void zebra_pbr_del_iptable(struct zebra_pbr_iptable *iptable)
 			list_delete_node(iptable->interface_name_list,
 					 node);
 		}
-		list_delete(&iptable->interface_name_list);
+		list_frr_delete(&iptable->interface_name_list);
 		XFREE(MTYPE_PBR_OBJ, lookup);
 	} else
 		zlog_debug("%s: IPTable being deleted we know nothing about",

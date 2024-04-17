@@ -96,7 +96,7 @@ void wheel_delete(struct timer_wheel *wheel)
 	int i;
 
 	for (i = 0; i < wheel->slots; i++) {
-		list_delete(&wheel->wheel_slot_lists[i]);
+		list_frr_delete(&wheel->wheel_slot_lists[i]);
 	}
 
 	EVENT_OFF(wheel->timer);

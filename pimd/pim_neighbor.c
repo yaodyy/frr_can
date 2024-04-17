@@ -366,7 +366,7 @@ static void delete_prefix_list(struct pim_neighbor *neigh)
 		}
 #endif
 
-		list_delete(&neigh->prefix_list);
+		list_frr_delete(&neigh->prefix_list);
 	}
 }
 
@@ -376,7 +376,7 @@ void pim_neighbor_free(struct pim_neighbor *neigh)
 
 	delete_prefix_list(neigh);
 
-	list_delete(&neigh->upstream_jp_agg);
+	list_frr_delete(&neigh->upstream_jp_agg);
 	EVENT_OFF(neigh->jp_timer);
 
 	bfd_sess_free(&neigh->bfd_session);

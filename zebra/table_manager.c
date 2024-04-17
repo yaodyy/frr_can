@@ -259,7 +259,7 @@ void table_manager_disable(struct zebra_vrf *zvrf)
 		zvrf->tbl_mgr = NULL;
 		return;
 	}
-	list_delete(&zvrf->tbl_mgr->lc_list);
+	list_frr_delete(&zvrf->tbl_mgr->lc_list);
 	XFREE(MTYPE_TM_TABLE, zvrf->tbl_mgr);
 	zvrf->tbl_mgr = NULL;
 }

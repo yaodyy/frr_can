@@ -193,7 +193,7 @@ void rip_peer_delete_routes(const struct rip_peer *peer)
 				EVENT_OFF(route_entry->t_garbage_collect);
 				listnode_delete(list, route_entry);
 				if (list_isempty(list)) {
-					list_delete((struct list **)&route_node
+					list_frr_delete((struct list **)&route_node
 							    ->info);
 					route_unlock_node(route_node);
 				}

@@ -277,7 +277,7 @@ static void bgp_address_hash_free(void *data)
 {
 	struct bgp_addr *addr = data;
 
-	list_delete(&addr->ifp_name_list);
+	list_frr_delete(&addr->ifp_name_list);
 	XFREE(MTYPE_BGP_ADDR, addr);
 }
 
@@ -367,7 +367,7 @@ static void bgp_address_del(struct bgp *bgp, struct connected *ifc,
 
 	if (addr->ifp_name_list->count == 0) {
 		hash_release(bgp->address_hash, addr);
-		list_delete(&addr->ifp_name_list);
+		list_frr_delete(&addr->ifp_name_list);
 		XFREE(MTYPE_BGP_ADDR, addr);
 	}
 }

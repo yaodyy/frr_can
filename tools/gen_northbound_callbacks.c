@@ -143,7 +143,7 @@ static void generate_callback_name(const struct lysc_node *snode,
 		strlcat(buffer, "_", size);
 	}
 	strlcat(buffer, nb_cb_operation_name(operation), size);
-	list_delete(&snodes);
+	list_frr_delete(&snodes);
 
 	replace_hyphens_by_underscores(buffer);
 }
@@ -174,7 +174,7 @@ static void generate_config_write_cb_name(const struct lysc_node *snode,
 
 	strlcat(buffer, "cli_write", size);
 
-	list_delete(&snodes);
+	list_frr_delete(&snodes);
 
 	replace_hyphens_by_underscores(buffer);
 }

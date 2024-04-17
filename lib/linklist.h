@@ -252,7 +252,7 @@ void **list_to_array(struct list *list, void **arr, size_t arrlen);
  *    pointer to list pointer; this will be set to NULL after the list has been
  *    deleted
  */
-extern void list_delete(struct list **plist);
+extern void list_frr_delete(struct list **plist);
 
 /*
  * Delete all nodes from a list without deleting the list itself.

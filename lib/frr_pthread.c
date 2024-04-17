@@ -63,7 +63,7 @@ void frr_pthread_finish(void)
 			frr_pthread_destroy_nolock(fpt);
 		}
 
-		list_delete(&frr_pthread_list);
+		list_frr_delete(&frr_pthread_list);
 	}
 }
 

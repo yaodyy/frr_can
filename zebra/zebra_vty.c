@@ -3600,7 +3600,7 @@ DEFPY (clear_evpn_dup_addr,
 				 NULL);
 	}
 
-	list_delete(&input);
+	list_frr_delete(&input);
 
 	return ret;
 }
