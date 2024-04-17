@@ -1043,10 +1043,58 @@ char *float2ip_str(float num)
  * Copy from bgp.packet.c, for the original function is static so that cannot be
  * refered in other file
  */
-static void bgp_packet_add(struct peer_connection *peer, struct stream *s)
+static void bgp_packet_add(struct peer_connection *connection,
+			   struct peer *peer, struct stream *s)
 {
-	frr_with_mutex (&peer->io_mtx) {
-		stream_fifo_push(peer->obuf, s);
+	intmax_t delta;
+	uint32_t holdtime;
+	intmax_t sendholdtime;
+
+	frr_with_mutex (&connection->io_mtx) {
+		/* if the queue is empty, reset the "last OK" timestamp to
+		 * now, otherwise if we write another packet immediately
+		 * after it'll get confused
+		 */
+		if (!stream_fifo_count_safe(connection->obuf))
+			peer->last_sendq_ok = monotime(NULL);
+
+		stream_fifo_push(connection->obuf, s);
+
+		delta = monotime(NULL) - peer->last_sendq_ok;
+
+		if (CHECK_FLAG(peer->flags, PEER_FLAG_TIMER))
+			holdtime = atomic_load_explicit(&peer->holdtime,
+							memory_order_relaxed);
+		else
+			holdtime = peer->bgp->default_holdtime;
+
+		sendholdtime = holdtime * 2;
+
+		/* Note that when we're here, we're adding some packet to the
+		 * OutQ.  That includes keepalives when there is nothing to
+		 * do, so there's a guarantee we pass by here once in a while.
+		 *
+		 * That implies there is no need to go set up another separate
+		 * timer that ticks down SendHoldTime, as we'll be here sooner
+		 * or later anyway and will see the checks below failing.
+		 */
+		if (!holdtime) {
+			/* no holdtime, do nothing. */
+		} else if (delta > sendholdtime) {
+			flog_err(
+				EC_BGP_SENDQ_STUCK_PROPER,
+				"%pBP has not made any SendQ progress for 2 holdtimes (%jds), terminating session",
+				peer, sendholdtime);
+			bgp_stop_with_notify(connection,
+					     BGP_NOTIFY_SEND_HOLD_ERR, 0);
+		} else if (delta > (intmax_t)holdtime &&
+			   monotime(NULL) - peer->last_sendq_warn > 5) {
+			flog_warn(
+				EC_BGP_SENDQ_STUCK_WARN,
+				"%pBP has not made any SendQ progress for 1 holdtime (%us), peer overloaded?",
+				peer, holdtime);
+			peer->last_sendq_warn = monotime(NULL);
+		}
 	}
 }
 
@@ -1069,7 +1117,7 @@ static void bgp_can_send_comstate_adver(struct peer_can *peer_can)
 
 	uint32_t tmp = 0;
 
-	s = stream_new(BGP_MAX_PACKET_SIZE);
+	s = stream_new(BGP_STANDARD_MESSAGE_MAX_PACKET_SIZE);
 
 	/* Make keepalive packet. */
 	bgp_packet_set_marker(s, BGP_MSG_UPDATE);
@@ -1143,11 +1191,11 @@ static void bgp_can_send_comstate_adver(struct peer_can *peer_can)
 	stream_putl(s, 0xacffffff);
 
 	/* Set packet size. */
-	(void)bgp_packet_set_size(s);
+	bgp_packet_set_size(s);
 
-	bgp_packet_add(peer, s);
+	bgp_packet_add(peer->connectoin, peer, s);
 
-	bgp_writes_on(peer);
+	bgp_writes_on(peer->connection);
 
 	char sid[32] = "";
 	char eip[32] = "";
