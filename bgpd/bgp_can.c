@@ -1043,7 +1043,7 @@ char *float2ip_str(float num)
  * Copy from bgp.packet.c, for the original function is static so that cannot be
  * refered in other file
  */
-static void bgp_packet_add(struct peer *peer, struct stream *s)
+static void bgp_packet_add(struct peer_connection *peer, struct stream *s)
 {
 	frr_with_mutex (&peer->io_mtx) {
 		stream_fifo_push(peer->obuf, s);
@@ -1327,8 +1327,10 @@ void *bgp_can_advertise_start(void *arg)
 }
 
 /* -------------------- thread external functions -------------------- */
-void bgp_can_advertise_on(struct peer *peer)
+void bgp_can_advertise_on(struct peer_connection *connection)
 {
+	struct peer *peer = connection->peer;
+
 	if (CHECK_FLAG(peer->thread_flags, PEER_THREAD_CAN_ADVER_ON))
 		return;
 
@@ -1355,8 +1357,10 @@ void bgp_can_advertise_on(struct peer *peer)
 	bgp_can_advertise_wake();
 }
 
-void bgp_can_advertise_off(struct peer *peer)
+void bgp_can_advertise_off(struct peer_connection *connection)
 {
+	struct peer *peer = connection->peer;
+
 	if (!CHECK_FLAG(peer->thread_flags, PEER_THREAD_CAN_ADVER_ON))
 		return;
 

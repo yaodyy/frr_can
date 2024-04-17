@@ -93,8 +93,8 @@ void int2str(int num, char *str);
 char *float2ip_str(float num);
 
 void *bgp_can_advertise_start(void *arg);
-void bgp_can_advertise_on(struct peer *peer);
-void bgp_can_advertise_off(struct peer *peer);
+void bgp_can_advertise_on(struct peer_connection *peer);
+void bgp_can_advertise_off(struct peer_connection *peer);
 void bgp_can_advertise_wake(void);
 int bgp_can_advertise_stop(struct frr_pthread *fpt, void **result);
 void *bgp_can_update_start(void *arg);
