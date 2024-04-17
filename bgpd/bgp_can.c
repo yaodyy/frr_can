@@ -24,6 +24,7 @@
 #include "bgpd/bgp_attr.h"
 #include "bgpd/bgp_can.h"
 #include "bgpd/bgp_ecommunity.h"
+#include "bgpd/bgp_errors.h"
 #include "bgpd/bgp_io.h"
 #include "bgpd/bgp_packet.h"
 
@@ -1193,7 +1194,7 @@ static void bgp_can_send_comstate_adver(struct peer_can *peer_can)
 	/* Set packet size. */
 	bgp_packet_set_size(s);
 
-	bgp_packet_add(peer->connectoin, peer, s);
+	bgp_packet_add(peer->connection, peer, s);
 
 	bgp_writes_on(peer->connection);
 
