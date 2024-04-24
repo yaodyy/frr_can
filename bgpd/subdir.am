@@ -28,6 +28,7 @@ bgpd_libbgp_a_SOURCES = \
 	bgpd/bgp_attr.c \
 	bgpd/bgp_attr_evpn.c \
 	bgpd/bgp_bfd.c \
+	bgpd/bgp_can.c \
 	bgpd/bgp_clist.c \
 	bgpd/bgp_community.c \
 	bgpd/bgp_community_alias.c \
@@ -108,6 +109,7 @@ noinst_HEADERS += \
 	bgpd/bgp_attr.h \
 	bgpd/bgp_attr_evpn.h \
 	bgpd/bgp_bfd.h \
+	bgpd/bgp_can.h \
 	bgpd/bgp_clist.h \
 	bgpd/bgp_community.h \
 	bgpd/bgp_community_alias.h \
