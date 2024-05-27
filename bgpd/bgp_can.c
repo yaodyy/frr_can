@@ -652,6 +652,42 @@ char **get_local_ip(char *ip[])
 }
 
 /***************************************************
+ * Function name: get_local_ipv6
+ * Description: get all local IPv6 address
+ * Parameters:
+ * 		@ip		To be filled with IPv6 address
+ * Return: local IPv6 address
+ *
+ ****************************************************/
+char **get_local_ipv6(char *ip[]) {
+    int n = 0;
+    int fd, interface;
+    struct ifreq buf[INET_ADDRSTRLEN];
+    struct ifconf ifc;
+
+    if ((fd = socket(AF_INET6, SOCK_DGRAM, IPPROTO_IP)) >= 0) {
+        ifc.ifc_len = sizeof(buf);
+        ifc.ifc_buf = (caddr_t)buf;
+
+        if (!ioctl(fd, SIOCGIFCONF, (char *)&ifc)) {
+            interface = ifc.ifc_len / sizeof(struct ifreq);
+
+            while (interface-- > 0) {
+                if (!(ioctl(fd, SIOCGIFADDR, (char *)&buf[interface]))) {
+                    ip[n] = (char *)malloc(INET6_ADDRSTRLEN);
+                    if (ip[n] != NULL) {
+                        inet_ntop(AF_INET6, &(((struct sockaddr_in6 *)&buf[interface].ifr_addr)->sin6_addr), ip[n], INET6_ADDRSTRLEN);
+                        n++;
+                    }
+                }
+            }
+        }
+        close(fd);
+    }
+    return ip;
+}
+
+/***************************************************
  * Function name: strrmv
  * Description: remove all chosen character from target string
  * Parameters:
