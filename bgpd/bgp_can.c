@@ -662,10 +662,10 @@ char **get_local_ip(char *ip[])
 char **get_local_ipv6(char *ip[]) {
     int n = 0;
     int fd, interface;
-    struct ifreq buf[INET_ADDRSTRLEN];
+    struct ifreq buf[INET6_ADDRSTRLEN];
     struct ifconf ifc;
 
-    if ((fd = socket(AF_INET6, SOCK_DGRAM, IPPROTO_IP)) >= 0) {
+    if ((fd = socket(AF_INET6, SOCK_DGRAM, IPPROTO_IP)) >= 0) {		// IPPROTO_IP = 0
         ifc.ifc_len = sizeof(buf);
         ifc.ifc_buf = (caddr_t)buf;
 
