@@ -142,7 +142,7 @@ static unsigned int peer_hash_can_key(const void *arg)
  * Return: target eip's netstate, or NULL if search failed
  *
  ****************************************************/
-static struct netstate *retrieve_netstate(struct in_addr *eip, struct bgp *bgp)
+static struct netstate *retrieve_netstate(struct in6_addr *eip, struct bgp *bgp)
 {
 	int s = bgp->net_table_size;
 	if (!s)
@@ -150,7 +150,7 @@ static struct netstate *retrieve_netstate(struct in_addr *eip, struct bgp *bgp)
 	int i = 0;
 	for (i = 0; i < s; i++) {
 		if (!memcmp(&bgp->net_table_entry[i]->dest_addr, eip,
-			    sizeof(struct in_addr)))
+			    sizeof(struct in6_addr)))
 			return bgp->net_table_entry[i];
 	}
 	return NULL;
@@ -166,19 +166,19 @@ static struct netstate *retrieve_netstate(struct in_addr *eip, struct bgp *bgp)
  * Return: NULL
  *
  ****************************************************/
-static void update_can_rib(struct in_addr *sid, struct in_addr *eip,
+static void update_can_rib(struct in6_addr *sid, struct in6_addr *eip,
 			   struct bgp *bgp)
 {
 	int s = bgp->can_rib_size;
 	int i = 0;
 	for (i = 0; i < s; i++)
-		if (!memcmp(sid, &bgp->can_rib_entry[i]->sid, sizeof(struct in_addr))) {
-			memcpy(&bgp->can_rib_entry[i]->eip, eip, sizeof(struct in_addr));
+		if (!memcmp(sid, &bgp->can_rib_entry[i]->sid, sizeof(struct in6_addr))) {
+			memcpy(&bgp->can_rib_entry[i]->eip, eip, sizeof(struct in6_addr));
 			return;
 		}
 	bgp->can_rib_entry[s] = XMALLOC(MTYPE_TMP, sizeof(struct can_rib));
-	memcpy(&bgp->can_rib_entry[s]->sid, sid, sizeof(struct in_addr));
-	memcpy(&bgp->can_rib_entry[s]->eip, eip, sizeof(struct in_addr));
+	memcpy(&bgp->can_rib_entry[s]->sid, sid, sizeof(struct in6_addr));
+	memcpy(&bgp->can_rib_entry[s]->eip, eip, sizeof(struct in6_addr));
 	bgp->can_rib_size++;
 	return;
 }
@@ -248,11 +248,12 @@ static void write_rib(struct bgp *bgp)
 	fp = fopen(filename, "w+");
 	int i = 0, crs = bgp->can_rib_size;
 	fputs("SID\t\tEIP\n", fp);
+	char sid_str[INET6_ADDRSTRLEN];
+	char eip_str[INET6_ADDRSTRLEN];
 	for (i = 0; i < crs; i++) {
-		fputs(inet_ntoa(bgp->can_rib_entry[i]->sid), fp);
-		fputs("\t", fp);
-		fputs(inet_ntoa(bgp->can_rib_entry[i]->eip), fp);
-		fputs("\n", fp);
+		inet_ntop(AF_INET6, &bgp->can_rib_entry[i]->sid, sid_str, INET6_ADDRSTRLEN);
+        inet_ntop(AF_INET6, &bgp->can_rib_entry[i]->eip, eip_str, INET6_ADDRSTRLEN);
+		fprintf(fp, "%s\t%s\n", sid_str, eip_str);
 	}
 	fclose(fp);
 	return;
@@ -274,7 +275,7 @@ static int path_calculation(struct bgp *bgp)
 	int i = 0, j = 0, cnt = 0;
 	struct netstate *ns;
 	struct comstate *cs;
-	struct in_addr eip;
+	struct in6_addr eip;
 	float cu_min = 100.0, mu_min = 100.0;
 	float l_min = 100.0, d_min = FLT_MAX, j_min = FLT_MAX;
 	int flag = 0;
@@ -284,17 +285,17 @@ static int path_calculation(struct bgp *bgp)
 		cu_min = 100.0, mu_min = 100.0;
 		l_min = 100.0, d_min = FLT_MAX, j_min = FLT_MAX;
 		flag = 0;
-		memset(&eip, 0, sizeof(struct in_addr));
+		memset(&eip, 0, sizeof(struct in6_addr));
 		for (j = 0; j < cts; j++) {
 			cs = bgp->com_table_entry[j];
 			if (!memcmp(&bgp->sid_list[i], cs,
-				    sizeof(struct in_addr))) {
+				    sizeof(struct in6_addr))) {
 				if (cs->com_usage < cu_min) {
 					ns = retrieve_netstate(&cs->egress_addr,
 							       bgp);
 					if (!ns) break;
 					memcpy(&eip, &cs->egress_addr,
-					       sizeof(struct in_addr));
+					       sizeof(struct in6_addr));
 					cu_min = cs->com_usage;
 					mu_min = cs->mem_usage;
 					l_min = ns->loss;
@@ -307,7 +308,7 @@ static int path_calculation(struct bgp *bgp)
 					if (!ns) break;
 					if (ns->loss < l_min) {
 						memcpy(&eip, &cs->egress_addr,
-						       sizeof(struct in_addr));
+						       sizeof(struct in6_addr));
 						cu_min = cs->com_usage;
 						mu_min = cs->mem_usage;
 						l_min = ns->loss;
@@ -318,7 +319,7 @@ static int path_calculation(struct bgp *bgp)
 						continue;
 					else if (ns->delay < d_min) {
 						memcpy(&eip, &cs->egress_addr,
-						       sizeof(struct in_addr));
+						       sizeof(struct in6_addr));
 						cu_min = cs->com_usage;
 						mu_min = cs->mem_usage;
 						l_min = ns->loss;
@@ -329,7 +330,7 @@ static int path_calculation(struct bgp *bgp)
 						continue;
 					else if (ns->jitter < j_min) {
 						memcpy(&eip, &cs->egress_addr,
-						       sizeof(struct in_addr));
+						       sizeof(struct in6_addr));
 						cu_min = cs->com_usage;
 						mu_min = cs->mem_usage;
 						l_min = ns->loss;
@@ -344,7 +345,7 @@ static int path_calculation(struct bgp *bgp)
 					cu_min = cs->com_usage;
 					mu_min = cs->mem_usage;
 					memcpy(&eip, &cs->egress_addr,
-					       sizeof(struct in_addr));
+					       sizeof(struct in6_addr));
 					flag = 1;
 				} else if (cs->mem_usage == mu_min) {
 					ns = retrieve_netstate(&cs->egress_addr,
@@ -352,7 +353,7 @@ static int path_calculation(struct bgp *bgp)
 					if (!ns) break;
 					if (ns->loss < l_min) {
 						memcpy(&eip, &cs->egress_addr,
-						       sizeof(struct in_addr));
+						       sizeof(struct in6_addr));
 						cu_min = cs->com_usage;
 						mu_min = cs->mem_usage;
 						l_min = ns->loss;
@@ -363,7 +364,7 @@ static int path_calculation(struct bgp *bgp)
 						continue;
 					else if (ns->delay < d_min) {
 						memcpy(&eip, &cs->egress_addr,
-						       sizeof(struct in_addr));
+						       sizeof(struct in6_addr));
 						cu_min = cs->com_usage;
 						mu_min = cs->mem_usage;
 						l_min = ns->loss;
@@ -374,7 +375,7 @@ static int path_calculation(struct bgp *bgp)
 						continue;
 					else if (ns->jitter < j_min) {
 						memcpy(&eip, &cs->egress_addr,
-						       sizeof(struct in_addr));
+						       sizeof(struct in6_addr));
 						cu_min = cs->com_usage;
 						mu_min = cs->mem_usage;
 						l_min = ns->loss;
@@ -404,14 +405,14 @@ static int path_calculation(struct bgp *bgp)
  * Return: True if stored, False if not stored
  *
  ****************************************************/
-static bool if_sid_exist(struct in_addr *sid, struct bgp *bgp)
+static bool if_sid_exist(struct in6_addr *sid, struct bgp *bgp)
 {
 	int s = bgp->sid_list_size;
 	if (!s)
 		return false;
 	int i = 0;
 	for (i = 0; i < s; i++)
-		if (!memcmp(sid, &bgp->sid_list[i], sizeof(struct in_addr)))
+		if (!memcmp(sid, &bgp->sid_list[i], sizeof(struct in6_addr)))
 			return true;
 	return false;
 }
@@ -425,12 +426,12 @@ static bool if_sid_exist(struct in_addr *sid, struct bgp *bgp)
  * Return: NULL
  *
  ****************************************************/
-static void update_sid_list(struct in_addr *sid, struct bgp *bgp)
+static void update_sid_list(struct in6_addr *sid, struct bgp *bgp)
 {
 	int s = bgp->sid_list_size;
 	if (if_sid_exist(sid, bgp))
 		return;
-	memcpy(&bgp->sid_list[s], sid, sizeof(struct in_addr));
+	memcpy(&bgp->sid_list[s], sid, sizeof(struct in6_addr));
 	bgp->sid_list_size++;
 }
 
@@ -447,17 +448,17 @@ static void update_sid_list(struct in_addr *sid, struct bgp *bgp)
  * Return: number of stored netstate entries
  *
  ****************************************************/
-static int update_net_entry(struct bgp *bgp, struct in_addr src,
-			    struct in_addr dst, float delay, float jitter,
+static int update_net_entry(struct bgp *bgp, struct in6_addr src,
+			    struct in6_addr dst, float delay, float jitter,
 			    float loss)
 {
 	int s = bgp->net_table_size;
 	int i = 0;
 	for (i = 0; i < s; i++) {
 		if (!memcmp(&(bgp->net_table_entry[i]->src_addr), &src,
-			    sizeof(struct in_addr))) {
+			    sizeof(struct in6_addr))) {
 			if (!memcmp(&(bgp->net_table_entry[i]->dest_addr), &dst,
-				    sizeof(struct in_addr))) {
+				    sizeof(struct in6_addr))) {
 				bgp->net_table_entry[i]->delay = delay;
 				bgp->net_table_entry[i]->jitter = jitter;
 				bgp->net_table_entry[i]->loss = loss;
@@ -489,16 +490,16 @@ static int update_net_entry(struct bgp *bgp, struct in_addr src,
  * Return: state code
  *
  ****************************************************/
-static int update_com_entry(struct bgp *bgp, struct in_addr sid,
-			    struct in_addr eip, float com, float mem, int pref)
+static int update_com_entry(struct bgp *bgp, struct in6_addr sid,
+			    struct in6_addr eip, float com, float mem, int pref)
 {
 	int s = bgp->com_table_size;
 	int i = 0;
 	for (i = 0; i < s; i++) {
 		if (!memcmp(&(bgp->com_table_entry[i]->sid_addr), &sid,
-			    sizeof(struct in_addr))
+			    sizeof(struct in6_addr))
 		    && !memcmp(&(bgp->com_table_entry[i]->egress_addr), &eip,
-			       sizeof(struct in_addr))) {
+			       sizeof(struct in6_addr))) {
 			if (pref > bgp->com_table_entry[i]->pref) {
 				bgp->com_table_entry[i]->com_usage = com;
 				bgp->com_table_entry[i]->mem_usage = mem;
@@ -535,14 +536,16 @@ static int update_com_entry(struct bgp *bgp, struct in_addr sid,
  * Return: NULL
  *
  ****************************************************/
-static void deal_with_com(struct bgp *bgp, struct in_addr sid,
-			  struct in_addr eip, float com, float mem, int pref)
+static void deal_with_com(struct bgp *bgp, struct in6_addr sid,
+			  struct in6_addr eip, float com, float mem, int pref)
 {
 	int ret = update_com_entry(bgp, sid, eip, com, mem, pref);
-	char sid_str[32] = "";
-	char eip_str[32] = "";
-	strcpy(sid_str, inet_ntoa(sid));
-	strcpy(eip_str, inet_ntoa(eip));
+
+	char sid_str[INET6_ADDRSTRLEN]; 
+    char eip_str[INET6_ADDRSTRLEN]; 
+	inet_ntop(AF_INET6, &sid, sid_str, INET6_ADDRSTRLEN);
+    inet_ntop(AF_INET6, &eip, eip_str, INET6_ADDRSTRLEN);
+
 	if (ret == SUCCESS_CODE) {
 		char buff[BUFFER_SIZE];
 		memset(buff, 0, BUFFER_SIZE);
@@ -553,8 +556,8 @@ static void deal_with_com(struct bgp *bgp, struct in_addr sid,
 		write_log(debug_adver_log, buff, &debug_adver_log_cnt);
 		XFREE(MTYPE_TMP, localtime);
 		struct comstate cs;
-		memcpy(&cs.sid_addr, &sid, sizeof(struct in_addr));
-		memcpy(&cs.egress_addr, &eip, sizeof(struct in_addr));
+		memcpy(&cs.sid_addr, &sid, sizeof(struct in6_addr));
+		memcpy(&cs.egress_addr, &eip, sizeof(struct in6_addr));
 		cs.com_usage = com;
 		cs.mem_usage = mem;
 		cs.pref = pref;
@@ -664,10 +667,11 @@ char **get_local_ipv6(char *ip[]) {
     int fd, interface;
     struct ifreq buf[INET6_ADDRSTRLEN];
     struct ifconf ifc;
-
+	
+	// 创建一个用于获取ipv6地址的套接字
     if ((fd = socket(AF_INET6, SOCK_DGRAM, IPPROTO_IP)) >= 0) {		// IPPROTO_IP = 0
-        ifc.ifc_len = sizeof(buf);
-        ifc.ifc_buf = (caddr_t)buf;
+        ifc.ifc_len = sizeof(buf);		// 设置 ifc 结构的缓冲区长度
+        ifc.ifc_buf = (caddr_t)buf;	    // 将缓冲区指针指向 buf
 
         if (!ioctl(fd, SIOCGIFCONF, (char *)&ifc)) {
             interface = ifc.ifc_len / sizeof(struct ifreq);
@@ -726,14 +730,14 @@ static int update_netstate(struct bgp *bgp)
 	}
 	bgp->ns_connect_established = 1;
 	char *local_ip[MAX_INTERFACE];
-	uint32_t tmp;
-	struct in_addr src, dst;
+	// uint32_t tmp;
+	struct in6_addr src, dst;
 	float delay, jitter, loss;
 	for (int i = 0; i < MAX_INTERFACE; i++) {
-		local_ip[i] = XMALLOC(MTYPE_TMP, 32);
-		memset(local_ip[i], 0, 32);
+		local_ip[i] = XMALLOC(MTYPE_TMP, INET6_ADDRSTRLEN);
+		memset(local_ip[i], 0, INET6_ADDRSTRLEN);
 	}
-	memcpy(local_ip, get_local_ip(local_ip), sizeof(char *));
+	memcpy(local_ip, get_local_ipv6(local_ip), sizeof(char *));
 	char request[1000] =
 		"GET /api/netstate?_fields=Source,Destination,Delay,Jitter,Loss&_where=(Source,eq,";
 	strcat(request, local_ip[0]);
@@ -789,10 +793,9 @@ static int update_netstate(struct bgp *bgp)
 			json_object_object_get(json_tmp, "Jitter"));
 		los_str = json_object_to_json_string(
 			json_object_object_get(json_tmp, "Loss"));
-		tmp = inet_addr(src_str);
-		memcpy(&src, &tmp, 4);
-		tmp = inet_addr(dst_str);
-		memcpy(&dst, &tmp, 4);
+		
+		inet_pton(AF_INET6, src_str, &src); 
+        inet_pton(AF_INET6, dst_str, &dst); 
 		delay = atof(dly_str);
 		jitter = atof(jtr_str);
 		loss = atof(los_str);

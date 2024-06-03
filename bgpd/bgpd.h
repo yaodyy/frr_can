@@ -393,7 +393,7 @@ struct bgp {
 	
 
 	/* Registered info */
-	struct in_addr sid_list[CAN_SID_LIST_MAXSIZE];
+	struct in6_addr sid_list[CAN_SID_LIST_MAXSIZE];
     int sid_list_size;
     struct can_rib *can_rib_entry[CAN_RIB_MAXSIZE];
     int can_rib_size;

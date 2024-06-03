@@ -61,30 +61,60 @@ struct peer_can {
 };
 
 /* Comstate content, may change in future */
+// ipv4
+// struct comstate
+// {
+// 	struct in_addr	sid_addr;		/* 服务ID，以任播地址标识 */
+// 	struct in_addr 	egress_addr; 	/* 算力路由出口节点IP地址 */
+// 	float 			com_usage;      /* 计算服务节点CPU/GPU/FPGA使用率 */
+// 	float 			mem_usage;		/* 计算服务节点内存使用率 */
+// 	int 			pref;		    /* 优先级 */
+// };
+
+// ipv6
 struct comstate
 {
-	struct in_addr	sid_addr;		/* 服务ID，以任播地址标识 */
-	struct in_addr 	egress_addr; 	/* 算力路由出口节点IP地址 */
+	struct in6_addr	sid_addr;		/* 服务ID，以任播地址标识 */
+	struct in6_addr egress_addr; 	/* 算力路由出口节点IP地址 */
 	float 			com_usage;      /* 计算服务节点CPU/GPU/FPGA使用率 */
 	float 			mem_usage;		/* 计算服务节点内存使用率 */
 	int 			pref;		    /* 优先级 */
 };
 
 /* Netstate content */
+// ipv4
+// struct netstate
+// {
+//     struct in_addr  src_addr;	/* 源IP地址 */
+//     struct in_addr  dest_addr;  /* 目的IP地址 */
+//     float 			delay;      /* 时延 */
+//     float 			jitter;     /* 时延抖动 */
+//     float 			loss;       /* 丢包率 */
+// };
+
+// ipv6
 struct netstate
 {
-    struct in_addr  src_addr;	/* 源IP地址 */
-    struct in_addr  dest_addr;  /* 目的IP地址 */
-    float 			delay;      /* 时延 */
-    float 			jitter;     /* 时延抖动 */
-    float 			loss;       /* 丢包率 */
+    struct in6_addr  src_addr;	/* 源IP地址 */
+    struct in6_addr  dest_addr;  /* 目的IP地址 */
+    float 			 delay;      /* 时延 */
+    float 			 jitter;     /* 时延抖动 */
+    float 			 loss;       /* 丢包率 */
 };
 
 /* CAN routing information base */
+// ipv4
+// struct can_rib
+// {
+//     struct in_addr sid;     /* 服务ID */
+//     struct in_addr eip;		/* Egress IP */ 
+// };
+
+// ipv6
 struct can_rib
 {
-    struct in_addr sid;     /* 服务ID */
-    struct in_addr eip;		/* Egress IP */ 
+    struct in6_addr sid;        /* 服务ID */
+    struct in6_addr eip;		/* Egress IP */ 
 }; 
 
 
