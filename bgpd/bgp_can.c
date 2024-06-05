@@ -840,15 +840,15 @@ static int update_comstate(struct bgp *bgp)
 	}
 	bgp->cs_connect_established = 1;
 	char *local_ip[MAX_INTERFACE];
-	uint32_t tmp;
-	struct in_addr sid, eip;
+	// uint32_t tmp;
+	struct in6_addr sid, eip;
 	float cpu, mem;
 	int pref;
 	for (int i = 0; i < MAX_INTERFACE; i++) {
-		local_ip[i] = XMALLOC(MTYPE_TMP, 32);
-		memset(local_ip[i], 0, 32);
+		local_ip[i] = XMALLOC(MTYPE_TMP, INET6_ADDRSTRLEN);
+		memset(local_ip[i], 0, INET6_ADDRSTRLEN);
 	}
-	memcpy(local_ip, get_local_ip(local_ip), sizeof(char *));
+	memcpy(local_ip, get_local_ipV6(local_ip), sizeof(char *));
 	char request[1000] =
 		"GET /api/comstate?_fields=sid,eip,cpu_usage,memory_usage,preference&_where=(eip,eq,";
 	strcat(request, local_ip[0]);
@@ -904,11 +904,10 @@ static int update_comstate(struct bgp *bgp)
 			json_object_object_get(json_tmp, "memory_usage"));
 		pref_str = json_object_to_json_string(
 			json_object_object_get(json_tmp, "preference"));
-		tmp = inet_addr(sid_str);
-		memcpy(&sid, &tmp, 4);
+		
+		inet_pton(AF_INET6, sid_str, &sid);
+		inet_pton(AF_INET6, eip_str, &eip);
 		update_sid_list(&sid, bgp);
-		tmp = inet_addr(eip_str);
-		memcpy(&eip, &tmp, 4);
 		cpu = atof(cpu_str);
 		mem = atof(mem_str);
 		pref = atoi(pref_str);
@@ -1014,6 +1013,85 @@ void parse_comstate(struct ecommunity *ecom)
 		XFREE(MTYPE_TMP, localtime);
 	}
 }
+
+/*
+ * Called by bgp_attr_ipv6_ext_communities().
+ */
+/***************************************************
+ * Function name: parse_ipv6_comstate
+ * Description: parse what we got from comstate advertisement message
+ * Parameters:
+ * 		@ecom		ipv6 extended community attribute with our comstate
+ *info Return: NULL
+ *
+ ****************************************************/
+void parse_ipv6_comstate(struct ecommunity *ecom)
+{
+	struct in6_addr sid;
+	struct in6_addr eip;
+	memset(&sid, 0, sizeof(struct in6_addr));
+	memset(&eip, 0, sizeof(struct in6_addr));
+	int com_100 = 0;
+	int mem_100 = 0;
+	float com = 0;
+	float mem = 0;
+	int pref = 0;
+	struct bgp *bgp;
+	bgp = bgp_get_default();
+	int i = 0;
+	int comstate_num = 0;
+
+	for (i = 0; i < ecom->size; i++) {
+		if (ecom->val[1 + IPV6_ECOMMUNITY_SIZE * i]
+		    == ECOMMUNITY_SERVICE_ID) {
+			comstate_num++;
+			memcpy(&sid, &(ecom->val[2 + IPV6_ECOMMUNITY_SIZE * i]), sizeof(struct in6_addr));
+			continue;
+		}
+		if (ecom->val[1 + IPV6_ECOMMUNITY_SIZE * i]
+		    == ECOMMUNITY_EGRESS_IP) {
+			comstate_num++;
+			memcpy(&eip, &(ecom->val[2 + IPV6_ECOMMUNITY_SIZE * i]), sizeof(struct in6_addr));
+			continue;
+		}
+		if (ecom->val[1 + IPV6_ECOMMUNITY_SIZE * i]
+		    == ECOMMUNITY_COMPUTATION_USAGE) {
+			comstate_num++;
+			memcpy(&com_100, &(ecom->val[2 + IPV6_ECOMMUNITY_SIZE * i]), 4);
+			com = (float)(ntohl(com_100)) / 100;
+			continue;
+		}
+		if (ecom->val[1 + IPV6_ECOMMUNITY_SIZE * i]
+		    == ECOMMUNITY_MEMORY_USAGE) {
+			comstate_num++;
+			memcpy(&mem_100, &(ecom->val[2 + IPV6_ECOMMUNITY_SIZE * i]), 4);
+			mem = (float)(ntohl(mem_100)) / 100;
+			continue;
+		}
+		if (ecom->val[1 + IPV6_ECOMMUNITY_SIZE * i] == ECOMMUNITY_ENABLED) {
+			comstate_num++;
+			memcpy(&pref, &(ecom->val[2 + IPV6_ECOMMUNITY_SIZE * i]), 4);
+			pref = ntohl(pref);
+			continue;
+		}
+	}
+	if (comstate_num > 0) {
+		deal_with_com(bgp, sid, eip, com, mem, pref);
+		char sid_a[INET6_ADDRSTRLEN] = "";
+		char eip_a[INET6_ADDRSTRLEN] = "";
+		inet_ntop(AF_INET6, &sid, sid_a, INET6_ADDRSTRLEN);
+        inet_ntop(AF_INET6, &eip, eip_a, INET6_ADDRSTRLEN);
+		char buff[BUFFER_SIZE];
+		memset(buff, 0, BUFFER_SIZE);
+		char *localtime = get_local_time();
+		sprintf(buff,
+			"[%s] Received Comstate Advertisement: SID: %s, EIP: %s, CPU usage: %.2f, Memory usage: %.2f, Preference: %d\n",
+			localtime, sid_a, eip_a, com, mem, pref);
+		write_log(cs_rcv_log, buff, &cs_rcv_log_cnt);
+		XFREE(MTYPE_TMP, localtime);
+	}
+}
+
 
 /**
  * Format convertion func.
@@ -1144,7 +1222,8 @@ static void bgp_packet_add(struct peer_connection *connection,
 /***************************************************
  * Function name: bgp_can_send_comstate_adver
  * Description: advertise single comstate information to single bgp peer, used
- *with function hash_iterate Parameters:
+ * with function hash_iterate 
+ * Parameters:
  * 		@peer_can		Pointer to peer and comstate
  * Return: NULL
  *
@@ -1165,8 +1244,8 @@ static void bgp_can_send_comstate_adver(struct peer_can *peer_can)
 	/* Set withdrawn routes length = 0 */
 	stream_putw(s, 0);
 
-	/* Set total path attribute length = 71 */
-	stream_putw(s, 0x0047);
+	/* Set total path attribute length = 131 */
+	stream_putw(s, 0x0083);
 
 	/* Set origin attribute */
 	/* Flag = 0x40,  Type code = 1(Origin), Length = 1, Origin = 0(IGP)*/
@@ -1193,38 +1272,50 @@ static void bgp_can_send_comstate_adver(struct peer_can *peer_can)
 	stream_putl(s, 0xffffffff);
 
 	/* Set comstate info(extcommunity) attribute */
-	/* Flag = 0xc0, Type code = 16(Extended community), Length = 40(5 entry)
-	 */
-	stream_put3(s, 0xc01028);
+	/* Flag = 0xc0, Type code = 16(Extended community), Length = 100(5 entry * 20 bytes) */
+	
+	// stream_put3(s, 0xc01028);
+	stream_put3(s, 0xc01064);
 
+	/* Entry 1 sid */
 	stream_putw(s, 0x0111);
-	memcpy(&tmp, &(entry->sid_addr), 4);
-	tmp = htonl(tmp);
-	stream_putl(s, tmp);
-	stream_putw(s, 0);
+	for(int i=0; i<16; i++){
+		stream_putc(s, entry->sid_addr.s6_addr[i]);
+	}
+	stream_putw(s, 0);		// Padding to make up 20 bytes (remaining 4 bytes)
 
+	/* Entry 2 eip */
 	stream_putw(s, 0x0113);
-	memcpy(&tmp, &(entry->egress_addr), 4);
-	tmp = htonl(tmp);
-	stream_putl(s, tmp);
-	stream_putw(s, 0);
+	for(int i=0; i<16; i++){
+		stream_putc(s, entry->egress_addr.s6_addr[i]);
+	}
+	stream_putw(s, 0);		// Padding to make up 20 bytes (remaining 4 bytes)
 
+	/* Entry 3 com_usage */
 	stream_putw(s, 0x0114);
 	tmp = inet_addr(float2ip_str(entry->com_usage));
 	tmp = htonl(tmp);
 	stream_putl(s, tmp);
-	stream_putw(s, 0);
+	for(int i=0; i<20-6; i++){	// Padding to make up 20 bytes 
+		stream_putc(s, 0);
+	}
 
+	/* Entry 4 mem_usage */
 	stream_putw(s, 0x0115);
 	tmp = inet_addr(float2ip_str(entry->mem_usage));
 	tmp = htonl(tmp);
 	stream_putl(s, tmp);
-	stream_putw(s, 0);
+	for(int i=0; i<20-6; i++){	// Padding to make up 20 bytes 
+		stream_putc(s, 0);
+	}
 
+	/* Entry 5 pref */
 	stream_putw(s, 0x0116);
 	tmp = entry->pref;
 	stream_putl(s, tmp);
-	stream_putw(s, 0);
+	for(int i=0; i<20-6; i++){	// Padding to make up 20 bytes 
+		stream_putc(s, 0);
+	}
 
 	/* Set NLRI with SID*/
 	stream_putc(s, 0x20);
@@ -1237,10 +1328,10 @@ static void bgp_can_send_comstate_adver(struct peer_can *peer_can)
 
 	bgp_writes_on(peer->connection);
 
-	char sid[32] = "";
-	char eip[32] = "";
-	strcpy(sid, inet_ntoa(entry->sid_addr));
-	strcpy(eip, inet_ntoa(entry->egress_addr));
+	char sid[INET6_ADDRSTRLEN] = "";
+	char eip[INET6_ADDRSTRLEN] = "";
+	inet_ntop(AF_INET6, &(entry->sid_addr), sid, INET6_ADDRSTRLEN);
+    inet_ntop(AF_INET6, &(entry->egress_addr), eip, INET6_ADDRSTRLEN);
 
 	char buff[BUFFER_SIZE];
 	memset(buff, 0, BUFFER_SIZE);

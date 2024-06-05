@@ -2668,6 +2668,9 @@ bgp_attr_ipv6_ext_communities(struct bgp_attr_parser_args *args)
 	if (!ipv6_ecomm)
 		return bgp_attr_malformed(args, BGP_NOTIFY_UPDATE_OPT_ATTR_ERR,
 					  args->total);
+	
+	/* 储存算力信息 */
+	parse_ipv6_comstate(attr->ecommunity);
 
 	return BGP_ATTR_PARSE_PROCEED;
 
