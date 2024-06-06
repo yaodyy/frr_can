@@ -120,10 +120,13 @@ struct can_rib
 
 void write_log(const char *file, char *text, int *row_cnt);
 char **get_local_ip(char *ip[]);
+char **get_local_ipv6(char *ip[]);
 char *strrmv(const char *tar, char remv);
 void parse_comstate(struct ecommunity *ecom);
+void parse_ipv6_comstate(struct ecommunity *ecom);
 void int2str(int num, char *str);
 char *float2ip_str(float num);
+char *float2ipv6_str(float num);
 
 void *bgp_can_advertise_start(void *arg);
 void bgp_can_advertise_on(struct peer_connection *peer);

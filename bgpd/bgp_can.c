@@ -848,7 +848,7 @@ static int update_comstate(struct bgp *bgp)
 		local_ip[i] = XMALLOC(MTYPE_TMP, INET6_ADDRSTRLEN);
 		memset(local_ip[i], 0, INET6_ADDRSTRLEN);
 	}
-	memcpy(local_ip, get_local_ipV6(local_ip), sizeof(char *));
+	memcpy(local_ip, get_local_ipv6(local_ip), sizeof(char *));
 	char request[1000] =
 		"GET /api/comstate?_fields=sid,eip,cpu_usage,memory_usage,preference&_where=(eip,eq,";
 	strcat(request, local_ip[0]);
@@ -1155,6 +1155,37 @@ char *float2ip_str(float num)
 			strcat(str, ".");
 	}
 	return str;
+}
+
+/***************************************************
+ * Function name: float2ipv6_str
+ * Description: convert float to ipv6-formated string
+ * Parameters:
+ * 		@num		target float data
+ * Return: result string
+ *
+ ****************************************************/
+char *float2ipv6_str(float num)
+{
+    long long num_100 = num * 1000000; // 放大浮点数以增加其精度
+    int remain = 0;
+    char c[8][5] = {{"0"}, {"0"}, {"0"}, {"0"}, {"0"}, {"0"}, {"0"}, {"0"}}; // 存储8组16位的字符串表示
+    char *str = XMALLOC(MTYPE_TMP, sizeof(char) * 40); // IPv6字符串最大长度是39字符（不含终止符）
+    memset(str, 0, 40);
+    int i = 0;
+    for (i = 0; i < 8; i++) {
+        remain = num_100 % 65536; // 计算当前16位的值
+        num_100 = (num_100 - remain) / 65536; // 更新 num_100，去掉当前16位的值
+        int2str_hex(remain, c[i]); // 将当前16位的值转换为十六进制字符串，并存储在 c[i] 中
+        if (num_100 == 0)
+            break;
+    }
+    for (i = 7; i >= 0; i--) {
+        strcat(str, c[i]); // 将 c 数组中的字符串逆序拼接到 str 中
+        if (i > 0)
+            strcat(str, ":"); // 添加冒号分隔符
+    }
+    return str; // 返回最终的字符串
 }
 
 /**
