@@ -1265,8 +1265,6 @@ static void bgp_can_send_comstate_adver(struct peer_can *peer_can)
 	struct peer *peer = peer_can->peer;
 	struct comstate *entry = com_list->head->next->entry;
 
-	uint32_t tmp = 0;
-
 	s = stream_new(BGP_STANDARD_MESSAGE_MAX_PACKET_SIZE);
 
 	/* Make keepalive packet. */
@@ -1322,28 +1320,49 @@ static void bgp_can_send_comstate_adver(struct peer_can *peer_can)
 	}
 	stream_putw(s, 0);		// Padding to make up 20 bytes (remaining 4 bytes)
 
+	uint8_t tmp[16]; // IPv6 地址长度为 16 字节
+
 	/* Entry 3 com_usage */
+
+	// stream_putw(s, 0x0114);
+	// tmp = inet_addr(float2ip_str(entry->com_usage));
+	// tmp = htonl(tmp);
+	// stream_putl(s, tmp);
+	// for(int i=0; i<20-6; i++){	// Padding to make up 20 bytes 
+	// 	stream_putc(s, 0);
+	// }
 	stream_putw(s, 0x0114);
-	tmp = inet_addr(float2ip_str(entry->com_usage));
-	tmp = htonl(tmp);
-	stream_putl(s, tmp);
-	for(int i=0; i<20-6; i++){	// Padding to make up 20 bytes 
-		stream_putc(s, 0);
+	char *ipv6_str = float2ipv6_str(entry->com_usage);
+	inet_pton(AF_INET6, ipv6_str, tmp);
+	free(ipv6_str); // 释放内存
+	for (int i = 0; i < 16; i++) {
+    	stream_putc(s, tmp[i]);
 	}
+	stream_putw(s, 0);		// Padding to make up 20 bytes (remaining 4 bytes)
+
 
 	/* Entry 4 mem_usage */
+
+	// stream_putw(s, 0x0115);
+	// tmp = inet_addr(float2ip_str(entry->mem_usage));
+	// tmp = htonl(tmp);
+	// stream_putl(s, tmp);
+	// for(int i=0; i<20-6; i++){	// Padding to make up 20 bytes 
+	// 	stream_putc(s, 0);
+	// }
 	stream_putw(s, 0x0115);
-	tmp = inet_addr(float2ip_str(entry->mem_usage));
-	tmp = htonl(tmp);
-	stream_putl(s, tmp);
-	for(int i=0; i<20-6; i++){	// Padding to make up 20 bytes 
-		stream_putc(s, 0);
+	ipv6_str = float2ipv6_str(entry->mem_usage);
+	inet_pton(AF_INET6, ipv6_str, tmp);
+	free(ipv6_str); // 释放内存
+	for (int i = 0; i < 16; i++) {
+    	stream_putc(s, tmp[i]);
 	}
+	stream_putw(s, 0);		// Padding to make up 20 bytes (remaining 4 bytes)
 
 	/* Entry 5 pref */
 	stream_putw(s, 0x0116);
-	tmp = entry->pref;
-	stream_putl(s, tmp);
+	uint32_t pref_tmp = entry->pref;
+	stream_putl(s, pref_tmp);
 	for(int i=0; i<20-6; i++){	// Padding to make up 20 bytes 
 		stream_putc(s, 0);
 	}
