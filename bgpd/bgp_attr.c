@@ -2628,8 +2628,8 @@ bgp_attr_ext_communities(struct bgp_attr_parser_args *args)
 	bgp_attr_extcom_tunnel_type(attr,
 		(bgp_encap_types *)&attr->encap_tunneltype);
 
-	/* 储存算力信息 */
-	parse_comstate(attr->ecommunity);
+	// /* 储存算力信息 */
+	// parse_comstate(attr->ecommunity);
 
 	/* Extract link bandwidth, if any. */
 	(void)ecommunity_linkbw_present(bgp_attr_get_ecommunity(attr),
@@ -2670,7 +2670,7 @@ bgp_attr_ipv6_ext_communities(struct bgp_attr_parser_args *args)
 					  args->total);
 	
 	/* 储存算力信息 */
-	parse_ipv6_comstate(attr->ecommunity);
+	parse_ipv6_comstate(attr->ipv6_ecommunity);
 
 	return BGP_ATTR_PARSE_PROCEED;
 
