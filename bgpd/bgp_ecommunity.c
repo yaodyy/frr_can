@@ -123,7 +123,7 @@ static bool ecommunity_add_val_internal(struct ecommunity *ecom,
 					}
 					return false;
 				}
-			}
+			} 
 		}
 		int ret = memcmp(p, eval, ecom_size);
 		if (ret == 0)

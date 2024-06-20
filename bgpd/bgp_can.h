@@ -22,7 +22,9 @@
 // git branch test
 
 /* for bgp_ecommunity.h */
-#define ECOMMUNITY_SERVICE_ID				0x11
+#define ECOMMUNITY_ENCODE_IPV6				0x0a	// high-order
+
+#define ECOMMUNITY_SERVICE_ID				0x11	// low-order
 #define ECOMMUNITY_EGRESS_IP				0x13
 #define ECOMMUNITY_COMPUTATION_USAGE		0x14
 #define ECOMMUNITY_MEMORY_USAGE				0x15

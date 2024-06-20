@@ -558,7 +558,7 @@ static inline void bgp_attr_set_community(struct attr *attr,
 }
 
 static inline struct ecommunity *
-bgp_attr_get_ipv6_ecommunity(const struct attr *attr)
+bgp_attr_get_ipv6_ecommunity(const struct attr *attr) 
 {
 	return attr->ipv6_ecommunity;
 }

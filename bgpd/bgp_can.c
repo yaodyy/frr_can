@@ -1307,7 +1307,8 @@ static void bgp_can_send_comstate_adver(struct peer_can *peer_can)
 	stream_put3(s, 0xc01064);
 
 	/* Entry 1 sid */
-	stream_putw(s, 0x0111);
+	// stream_putw(s, 0x0111);
+	stream_putw(s, 0x0011);
 	for(int i=0; i<16; i++){
 		stream_putc(s, entry->sid_addr.s6_addr[i]);
 	}

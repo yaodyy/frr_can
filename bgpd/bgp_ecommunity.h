@@ -150,7 +150,7 @@ struct ecommunity_val {
 	char val[ECOMMUNITY_SIZE];
 };
 
-/* IPv6 Extended community value is eight octet.  */
+/* IPv6 Extended community value is twenty octet.  */
 struct ecommunity_val_ipv6 {
 	char val[IPV6_ECOMMUNITY_SIZE];
 };
