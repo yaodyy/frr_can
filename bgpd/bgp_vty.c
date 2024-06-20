@@ -1527,10 +1527,10 @@ DEFUN_NOSH (router_bgp,
 			return CMD_WARNING_CONFIG_FAILED;
 		}
 
-		if (listcount(bm->bgp) > 1) {
-			vty_out(vty, "%% Please specify ASN and VRF\n");
-			return CMD_WARNING_CONFIG_FAILED;
-		}
+		// if (listcount(bm->bgp) > 1) {
+		// 	vty_out(vty, "%% Please specify ASN and VRF\n");
+		// 	return CMD_WARNING_CONFIG_FAILED;
+		// }
 	}
 
 	// "router bgp X"
