@@ -1,10 +1,10 @@
 /*********************************************
  * @File name: bgp_can.c
- * @Author: zyh, cz
+ * @Author: ydy, fy
  * @Version: 1.0
- * @Date: 2021-9-29
+ * @Date: 2024-4-19
  * @Description: CAN related functions' implementation
- * @Copyright: © 2023 BUPT. All rights reserved.
+ * @Copyright: © 2024 BUPT. All rights reserved.
  **********************************************/
 
 #include <arpa/inet.h>

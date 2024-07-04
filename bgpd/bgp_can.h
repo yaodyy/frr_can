@@ -1,10 +1,10 @@
 /*********************************************
  * @File name: bgp_can.h
- * @Author: zyh, cz
+ * @Author: ydy, fz
  * @Version: 1.0
- * @Date: 2021-9-27
+ * @Date: 2024-4-19
  * @Description: Macro definition, function declaration, structrue definition, blah blah
- * @Copyright: © 2023 BUPT. All rights reserved.
+ * @Copyright: © 2024 BUPT. All rights reserved.
  **********************************************/
 
 #ifndef _FRR_BGP_CAN_H
