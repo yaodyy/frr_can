@@ -1,6 +1,6 @@
 /*********************************************
  * @File name: bgp_can.h
- * @Author: ydy, fz
+ * @Author: ydy, fy
  * @Version: 1.0
  * @Date: 2024-4-19
  * @Description: Macro definition, function declaration, structrue definition, blah blah
