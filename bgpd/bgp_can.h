@@ -26,7 +26,7 @@
 #define ECOMMUNITY_ENABLED					0x16
 
 /* for bgpd.c */
-#define BGP_DEFAULT_CAN_ADVERTISE			10
+#define  BGP_DEFAULT_CAN_ADVERTISE          10
 
 /* CAN type identification code */
 #define CAN_ROUTER_TYPE_INTERMIDIATE		0

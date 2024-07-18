@@ -2731,6 +2731,22 @@ DEFUN (config_can_if_port,
 	return CMD_SUCCESS;
 }
 
+/* config can advertisement cycle */
+DEFUN (config_can_advertisement_cycle,
+	   config_can_advertisement_cycle_cmd,
+	   "config can advertisement cycle (1-65535)",
+	   "Customed configure CAN\n"
+	   "Computation Aware Network\n"
+	   "CAN advertisment\n"
+	   "CAN advertisement cycle\n"
+	   "Cycle value\n")
+{
+	struct bgp *bgp = bgp_get_default();
+	bgp->default_can_advertise = strtoul(argv[4]->arg, NULL, 10);
+	return CMD_SUCCESS;
+}
+
+
 /* reset CAN table command  */
 DEFUN (reset_can_table,
 	   reset_can_table_cmd,
@@ -16305,17 +16321,6 @@ DEFUN (show_ip_bgp_can_info,
 		}
 	}
 
-	// int els = bgp->eip_list_size;
-	// if(els == 0){
-	// 	vty_out(vty, "\nNo registered EIP\n");
-	// }else{
-	// 	vty_out(vty, "\nRegistered EIP list:\n");
-	// 	for(i = 0;i < els;i++){
-	// 		sid = &(bgp->eip_list[i]);
-	// 		vty_out(vty, "[%d]: %s\n", i + 1, inet_ntoa(eip));
-	// 	}
-	// }
-
 	int crs = bgp->can_rib_size;
 	if(crs == 0){
 		vty_out(vty, "\nEmpty CAN RIB\n");
@@ -20241,6 +20246,7 @@ void bgp_vty_init(void)
 	install_element(BGP_NODE, &config_can_type_cmd);
 	install_element(BGP_NODE, &config_can_if_host_cmd);
 	install_element(BGP_NODE, &config_can_if_port_cmd);
+	install_element(BGP_NODE, &config_can_advertisement_cycle_cmd);
 	install_element(BGP_NODE, &reset_can_table_cmd);
 
 	/* "minimum-holdtime" commands. */
