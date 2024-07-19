@@ -2731,15 +2731,15 @@ DEFUN (config_can_if_port,
 	return CMD_SUCCESS;
 }
 
-/* config can advertisement cycle */
-DEFUN (config_can_advertisement_cycle,
-	   config_can_advertisement_cycle_cmd,
-	   "config can advertisement cycle (1-65535)",
+/* config can advertisement interval */
+DEFUN (config_can_advertisement_interval,
+	   config_can_advertisement_interval_cmd,
+	   "config can advertisement interval (1-65535)",
 	   "Customed configure CAN\n"
 	   "Computation Aware Network\n"
 	   "CAN advertisment\n"
-	   "CAN advertisement cycle\n"
-	   "Cycle value\n")
+	   "CAN advertisement interval\n"
+	   "Interval value\n")
 {
 	struct bgp *bgp = bgp_get_default();
 	bgp->default_can_advertise = strtoul(argv[4]->arg, NULL, 10);
@@ -16333,7 +16333,7 @@ DEFUN (show_ip_bgp_can_info,
 		}
 	}
 
-	vty_out(vty, "\nCAN advertisement cycle: %d s\n", bgp->default_can_advertise);
+	vty_out(vty, "\nCAN advertisement interval: %d s\n", bgp->default_can_advertise);
 	vty_out(vty, "\n");
 
 	vty_out(vty, "This device's type is ");
@@ -16355,7 +16355,7 @@ DEFUN (show_ip_bgp_can_info,
 
 	vty_out(vty, "Registered restful information: \n");
 	vty_out(vty, "Host: %s, ", bgp->server_host);
-	vty_out(vty, "POrt: %d\n", bgp->service_port);
+	vty_out(vty, "Port: %d\n", bgp->service_port);
 
 
 	if (!bgp->cs_connect_established)
@@ -20246,7 +20246,7 @@ void bgp_vty_init(void)
 	install_element(BGP_NODE, &config_can_type_cmd);
 	install_element(BGP_NODE, &config_can_if_host_cmd);
 	install_element(BGP_NODE, &config_can_if_port_cmd);
-	install_element(BGP_NODE, &config_can_advertisement_cycle_cmd);
+	install_element(BGP_NODE, &config_can_advertisement_interval_cmd);
 	install_element(BGP_NODE, &reset_can_table_cmd);
 
 	/* "minimum-holdtime" commands. */
