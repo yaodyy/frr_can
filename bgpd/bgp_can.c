@@ -19,6 +19,8 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <float.h>
+#include <stdlib.h>
+#include <time.h>
 
 #include "bgpd/bgpd.h"
 #include "bgpd/bgp_attr.h"
@@ -260,13 +262,78 @@ static void write_rib(struct bgp *bgp)
 
 /***************************************************
  * Function name: path_calculation
- * Description: calculate rib by comstate and netstate information
+ * Description: calculate rib by comstate and netstate information base on deferent routing strategy
  * Parameters:
  * 		@bgp		Default bgp instance
  * Return: Calulation results count, or 0 if error
  *
  ****************************************************/
 static int path_calculation(struct bgp *bgp)
+{
+	switch (bgp->can_routing_strategy_code)
+	{
+	case CAN_ROUTING_STRATEGY_RANDOM:
+		return path_calculation_random(bgp);
+		break;
+	case CAN_ROUTING_STRATEGY_RULE:
+		return path_calculation_rule(bgp);
+		break;
+	case CAN_ROUTING_STRATEGY_SCORE:
+		return path_calculation_score(bgp);
+		break;
+	default:
+		break;
+	}
+	return 0;
+}
+
+/***************************************************
+ * Function name: path_calculation_random
+ * Description: calculate rib base on random strategy
+ * Parameters:
+ * 		@bgp		Default bgp instance
+ * Return: Calculation results count, or 0 if error
+ *
+ ****************************************************/
+static int path_calculation_random(struct bgp *bgp)
+{
+	int sls = bgp->sid_list_size;
+	int cts = bgp->com_table_size;
+	struct comstate *cs;
+	struct in_addr eip;
+	int i = 0, j = 0, cnt = 0;
+	for(i=0; i<sls; i++){
+		struct in_addr *eip_record[CAN_COMSTATE_MAXSIZE];
+		int eip_count = 0;
+		for(j=0; j<cts; j++){
+			cs = bgp->com_table_entry[j];
+			if(!memcmp(&bgp->sid_list[i], cs,
+				    sizeof(struct in_addr))){
+					eip_record[eip_count++] = &cs->egress_addr;
+					}
+		}
+		if(eip_count > 0){
+			srand(time(NULL));
+			int random_index = rand() % eip_count;
+			memcpy(&eip, eip_record[random_index],
+								sizeof(struct in_addr))
+			update_can_rib(&bgp->sid_list[i], &eip, bgp);
+			cnt++;
+		}
+	}
+	return cnt;
+}
+
+
+/***************************************************
+ * Function name: path_calculation_rule
+ * Description: calculate rib by comstate and netstate information base on specific rule
+ * Parameters:
+ * 		@bgp		Default bgp instance
+ * Return: Calculation results count, or 0 if error
+ *
+ ****************************************************/
+static int path_calculation_rule(struct bgp *bgp)
 {
 	int cts = bgp->com_table_size;
 	int nts = bgp->net_table_size;
@@ -393,6 +460,59 @@ static int path_calculation(struct bgp *bgp)
 		}
 	}
 	return cnt;
+}
+
+/***************************************************
+ * Function name: path_calculation_score
+ * Description: calculate rib by comstate and netstate information base on scoring function
+ * scoring function:
+ *       score = 100*(a*com + b*mem + e*los) + 1000*(c*del + d*jit)
+ * Parameters:
+ * 		@bgp		Default bgp instance
+ * Return: Calculation results count, or 0 if error
+ *
+ ****************************************************/
+static int path_calculation_score(struct bgp *bgp)
+{
+	float a=0.3, b=0.2, c=0.2, d=0.1, e=0.2;
+	int cts = bgp->com_table_size;
+	int nts = bgp->net_table_size;
+	int sls = bgp->sid_list_size;
+	int i = 0, j = 0, cnt = 0;
+	struct netstate *ns;
+	struct comstate *cs;
+	struct in_addr eip;
+	int flag = 0;
+
+	if (!sls || !nts || !cts)
+		return 0;
+
+	for (i = 0; i < sls; i++) {
+		flag = 0;
+		float cur_score;
+		float min_score = FLT_MAX;
+		memset(&eip, 0, sizeof(struct in_addr));
+		for (j = 0; j < cts; j++) {
+			cs = bgp->com_table_entry[j];
+			if (!memcmp(&bgp->sid_list[i], cs,
+				    sizeof(struct in_addr))) {
+					ns = retrieve_netstate(&cs->egress_addr, bgp);
+					if (!ns) break;
+					cur_score = 100*(a*cs->com_usage + b*cs->mem_usage + e*ns->loss) + 1000*(c*ns->delay + d*ns->jitter);
+					if(cur_score<min_score){
+						min_score = cur_score;
+						flag = 1;
+						memcpy(&eip, &cs->egress_addr,
+					       sizeof(struct in_addr));
+					}
+			}
+		}
+		if(flag==1){
+			update_can_rib(&bgp->sid_list[i], &eip, bgp);
+			cnt++;
+		}
+	}
+	return cnt;			
 }
 
 /***************************************************

@@ -2696,6 +2696,46 @@ DEFUN (config_can_type,
 	return CMD_SUCCESS;
 }
 
+/* config can routing strategy */
+DEFUN (config_can_routing_strategy,
+	   config_can_routing_strategy_cmd,
+	   "config can routing strategy (0-2)",
+	   "Customed configure CAN\n"
+	   "Computation Aware Network\n"
+	   "CAN routing strategy type\n"
+	   "0--Random, 1--Rule, 2--Score\n")
+{
+	struct bgp *bgp;
+	bgp = bgp_get_default();
+	if (!bgp) {
+		vty_out(vty, "%% No such BGP instance exist\n");
+		return CMD_WARNING;
+	}
+	unsigned long type = 0;
+	type = strtoul(argv[4]->arg, NULL, 10);
+	if (type > 2){
+		vty_out(vty, "%% type code must be 0, 1 or 2\n");
+		return CMD_WARNING;
+	}
+	bgp->can_routing_strategy_code = (int)type;
+	vty_out(vty, "%% Routing strategy is: ");
+	switch(bgp->can_routing_strategy_code){
+		case CAN_ROUTING_STRATEGY_RANDOM:
+			vty_out(vty, "random\n");
+			break;
+		case CAN_ROUTING_STRATEGY_RULE:
+			vty_out(vty, "rule\n");
+			break;
+		case CAN_ROUTING_STRATEGY_SCORE:
+			vty_out(vty, "score\n");
+			break;
+		default:
+			vty_out(vty, "unknown\n");
+			break;
+	}
+	return CMD_SUCCESS;
+}
+
 /* config can restful interface info */
 DEFUN (config_can_if_host,
 	   config_can_if_host_cmd,
@@ -16344,6 +16384,22 @@ DEFUN (show_ip_bgp_can_info,
 			break;
 		case CAN_ROUTER_TYPE_INGRESS_NODE:
 			vty_out(vty, "Ingress node\n");
+			switch(bgp->can_routing_strategy_code)
+			{
+				case CAN_ROUTING_STRATEGY_RANDOM:
+					vty_out(vty, "Random\n");
+					break;
+				case CAN_ROUTING_STRATEGY_RULE:
+					vty_out(vty, "Rule\n");
+					break;
+				case CAN_ROUTING_STRATEGY_SCORE:
+					vty_out(vty, "Score\n");
+					vty_out(vty, "Scoring function: 100*(0.3*com + 0.2*mem + 0.2*los) + 1000*(0.2*del + 0.1*jit)\n");
+					break;
+				default:
+					vty_out(vty, "unknown\n");
+					break;
+			}
 			break;
 		case CAN_ROUTER_TYPE_EGRESS_NODE:
 			vty_out(vty, "Egress node\n");
@@ -20247,6 +20303,7 @@ void bgp_vty_init(void)
 	install_element(BGP_NODE, &config_can_if_host_cmd);
 	install_element(BGP_NODE, &config_can_if_port_cmd);
 	install_element(BGP_NODE, &config_can_advertisement_interval_cmd);
+	install_element(BGP_NODE, &config_can_routing_strategy_cmd);
 	install_element(BGP_NODE, &reset_can_table_cmd);
 
 	/* "minimum-holdtime" commands. */

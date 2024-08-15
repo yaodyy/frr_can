@@ -41,6 +41,12 @@
 
 #define TCP_BUFFSIZE                        1460
 
+/* CAN routing strategy */
+#define CAN_ROUTING_STRATEGY_DAFAULT        1
+#define CAN_ROUTING_STRATEGY_RANDOM         0
+#define CAN_ROUTING_STRATEGY_RULE           1
+#define CAN_ROUTING_STRATEGY_SCORE          2
+
 struct bgp;
 
 struct com_node {
