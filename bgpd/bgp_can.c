@@ -260,32 +260,6 @@ static void write_rib(struct bgp *bgp)
 	return;
 }
 
-/***************************************************
- * Function name: path_calculation
- * Description: calculate rib by comstate and netstate information base on deferent routing strategy
- * Parameters:
- * 		@bgp		Default bgp instance
- * Return: Calulation results count, or 0 if error
- *
- ****************************************************/
-static int path_calculation(struct bgp *bgp)
-{
-	switch (bgp->can_routing_strategy_code)
-	{
-	case CAN_ROUTING_STRATEGY_RANDOM:
-		return path_calculation_random(bgp);
-		break;
-	case CAN_ROUTING_STRATEGY_RULE:
-		return path_calculation_rule(bgp);
-		break;
-	case CAN_ROUTING_STRATEGY_SCORE:
-		return path_calculation_score(bgp);
-		break;
-	default:
-		break;
-	}
-	return 0;
-}
 
 /***************************************************
  * Function name: path_calculation_random
@@ -513,6 +487,33 @@ static int path_calculation_score(struct bgp *bgp)
 		}
 	}
 	return cnt;			
+}
+
+/***************************************************
+ * Function name: path_calculation
+ * Description: calculate rib by comstate and netstate information base on deferent routing strategy
+ * Parameters:
+ * 		@bgp		Default bgp instance
+ * Return: Calulation results count, or 0 if error
+ *
+ ****************************************************/
+static int path_calculation(struct bgp *bgp)
+{
+	switch (bgp->can_routing_strategy_code)
+	{
+	case CAN_ROUTING_STRATEGY_RANDOM:
+		return path_calculation_random(bgp);
+		break;
+	case CAN_ROUTING_STRATEGY_RULE:
+		return path_calculation_rule(bgp);
+		break;
+	case CAN_ROUTING_STRATEGY_SCORE:
+		return path_calculation_score(bgp);
+		break;
+	default:
+		break;
+	}
+	return 0;
 }
 
 /***************************************************

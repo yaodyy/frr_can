@@ -381,6 +381,9 @@ struct bgp {
 	/* Comstate advertisement delay */
 	uint32_t default_can_advertise;
 
+	/* CAN routing strategy */
+	int can_routing_strategy_code;
+
 	/* CAN type identification */
 	int can_type_code;
 
