@@ -316,7 +316,7 @@ static int path_calculation_random(struct bgp *bgp)
 			srand(time(NULL));
 			int random_index = rand() % eip_count;
 			memcpy(&eip, eip_record[random_index],
-								sizeof(struct in_addr))
+								sizeof(struct in_addr));
 			update_can_rib(&bgp->sid_list[i], &eip, bgp);
 			cnt++;
 		}
