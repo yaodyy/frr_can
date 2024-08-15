@@ -16384,6 +16384,7 @@ DEFUN (show_ip_bgp_can_info,
 			break;
 		case CAN_ROUTER_TYPE_INGRESS_NODE:
 			vty_out(vty, "Ingress node\n");
+			vty_out(vty, "Routing strategy: ");
 			switch(bgp->can_routing_strategy_code)
 			{
 				case CAN_ROUTING_STRATEGY_RANDOM:
